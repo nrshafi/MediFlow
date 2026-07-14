@@ -4,13 +4,19 @@ Update this file after every meaningful implementation change.
 
 ## Current Phase
 
-- Not started — context files complete and confirmed, implementation not begun
+- Phase 1 complete — monorepo scaffold and build foundation verified
 
 ## Current Goal
 
-- Scaffold the monorepo (React + Vite frontend, Hono backend on Cloudflare Workers, Turso, shared types) with builds passing
+- Build the Turso data model and deterministic resource/patient seeds
 
 ## Completed
+
+- 2026-07-15 - Documented local Worker secrets in `backend/.dev.vars.example` and expanded Git ignores to protect environment-specific `.dev.vars` and `.env` files
+
+- 2026-07-15 - Scaffolded the npm-workspace monorepo with `frontend/`, `backend/`, and `shared/`; added the Hono Worker entry point, Turso/Drizzle client boundary, shared API/domain contracts, strict TypeScript checks, route-level frontend code splitting, and GitHub CI; verified all workspace checks and production builds
+
+- 2026-07-14 - Added a project-scoped Codex connection to Cloudflare's official API MCP server, using OAuth and write-action approvals
 
 - 2026-07-14 - Added manual previous/next minute controls beside simulation playback, with reversible state history and automatic pausing during manual steps
 - 2026-07-14 - Removed the top-bar "ORCHESTRATION LIVE" status label
@@ -29,24 +35,23 @@ Update this file after every meaningful implementation change.
 
 ## Next Up
 
-1. Project scaffold: `frontend/` + `backend/` + `shared/`, GitHub CI, `npm run build` green
-2. Data model + seeds: resources (3 doctors, 1 lab, 1 X-ray, 1 ECG) and 20–50 simulated patients with histories
-3. Simulation clock + patient arrival / stage-completion events
-4. Deterministic scheduling engine v1 — next-step recommendation per patient
-5. Live Resource Dashboard v1 — resource status, queues, wait estimates (polling)
-6. Queue prediction + bottleneck detection
-7. LLM explanation layer, then pre-consultation summaries (Gemini)
-8. Before/after impact metrics vs. uncoordinated baseline
+1. Data model + seeds: resources (3 doctors, 1 lab, 1 X-ray, 1 ECG) and 20–50 simulated patients with histories
+2. Simulation clock + patient arrival / stage-completion events
+3. Deterministic scheduling engine v1 — next-step recommendation per patient
+4. Live Resource Dashboard v1 — resource status, queues, wait estimates (polling)
+5. Queue prediction + bottleneck detection
+6. LLM explanation layer, then pre-consultation summaries (Gemini)
+7. Before/after impact metrics vs. uncoordinated baseline
 
 ## Open Questions
 
 - **Priority levels** — patients have a "priority level", but its semantics (how many levels, how they weight scheduling order) are unspecified. Needs a product decision before engine v1
-- **DB access layer** — Drizzle ORM vs. raw libSQL client for Turso. Default: Drizzle, unless overridden before the scaffold
-- **Repo layout** — monorepo boundaries proposed in `architecture.md`. Default: as proposed, unless overridden before the scaffold
 - **Baseline definition** — what "before" means for before/after metrics. Default: the same patient set run through naive FIFO with no orchestration
 
 ## Architecture Decisions
 
+- **npm-workspace monorepo** with `frontend/`, `backend/`, and `shared/` boundaries; the existing React prototype is preserved in the frontend workspace *(implemented 2026-07-15)*
+- **Drizzle ORM over the libSQL client for Turso access**; database construction stays in `backend/src/db/` and credentials remain Worker bindings *(implemented 2026-07-15)*
 - **Deterministic rule-based scheduler; LLM is language-only** — explainable and safe for healthcare; no black-box medical decisions; no ML-training or dataset risk *(from the brief)*
 - **Overlay architecture** — sits on top of existing hospital systems; consumes only resource status + service-duration estimates; low-friction adoption *(from the brief)*
 - **Cloudflare Pages + Workers + Turso + GitHub** — the standard low-cost edge web stack specified in the brief
@@ -57,6 +62,10 @@ Update this file after every meaningful implementation change.
 - **Tailwind CSS + shadcn/ui** as the component layer *(decided 2026-07-14)*
 
 ## Session Notes
+
+- 2026-07-15: Completed the scaffold phase. `npm run check` passes for all three workspaces, and `npm run build` produces the Vite frontend bundle plus a successful Wrangler dry-run Worker bundle. Turso credentials are intentionally left for local/deployment environment configuration and are not required for the scaffold build.
+
+- 2026-07-14: Added `.codex/config.toml` for the official `https://mcp.cloudflare.com/mcp` endpoint; Codex clients must restart and complete Cloudflare OAuth before first use.
 
 - 2026-07-14: Simulation playback now records each deterministic minute (including individual minutes at 4× speed), allowing the top-bar previous/next controls to move one minute at a time; manual stepping pauses auto-run and reset clears the history.
 - 2026-07-14: Removed the top-bar orchestration status label while retaining the shared pulse indicator used in staff and patient views.

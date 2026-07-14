@@ -58,4 +58,4 @@
 - `backend/src/db/` — schema, queries, seeds
 - `shared/` — cross-cutting domain types and API contracts
 
-*(Layout is proposed — confirm before scaffolding.)*
+This layout is implemented as an npm-workspace monorepo.

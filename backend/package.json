@@ -1,0 +1,22 @@
+{
+  "name": "@mediflow/backend",
+  "private": true,
+  "version": "0.0.1",
+  "type": "module",
+  "scripts": {
+    "build": "wrangler deploy --dry-run --outdir dist",
+    "check": "tsc --noEmit",
+    "dev": "wrangler dev"
+  },
+  "dependencies": {
+    "@libsql/client": "0.17.4",
+    "@mediflow/shared": "0.0.1",
+    "drizzle-orm": "0.45.2",
+    "hono": "4.12.30"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "5.20260714.1",
+    "typescript": "7.0.2",
+    "wrangler": "4.110.0"
+  }
+}

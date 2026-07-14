@@ -7,12 +7,12 @@
 | Frontend     | React + TypeScript (Vite)                                     | Staff dashboard, patient guidance view, doctor brief view  |
 | Charts       | Chart.js                                                      | Queue, wait-time, and utilization visualizations           |
 | Backend      | Hono (TypeScript) on Cloudflare Workers                       | REST API, scheduling engine, simulation, LLM adapter       |
-| Database     | Turso (edge-hosted SQLite / libSQL)                           | Resources, patients, queue state, events, metric snapshots |
+| Database     | Turso (edge-hosted SQLite / libSQL) + Drizzle ORM             | Resources, patients, queue state, events, metric snapshots |
 | LLM          | Gemini API (single key, behind a provider-agnostic adapter)   | Natural-language explanations + pre-consultation summaries |
 | Live updates | REST polling (every few seconds)                              | Keeps dashboard and patient views current — no WebSockets  |
 | Hosting & CI | Cloudflare Pages (frontend), Cloudflare Workers (API), GitHub | Deployment, version control, CI                            |
 
-*(Vite is proposed — the brief specifies React but not the build tool.)*
+Vite is the confirmed frontend build tool.
 
 ## System Boundaries
 
@@ -23,7 +23,7 @@
 - `backend/src/db/` — Turso schema, queries, seed/simulation data
 - `shared/` — domain types and API contracts imported by both frontend and backend
 
-*(Monorepo layout is proposed — not specified in the source PDFs; confirm before scaffolding.)*
+The npm-workspace monorepo layout was implemented on 2026-07-15.
 
 ## Storage Model
 

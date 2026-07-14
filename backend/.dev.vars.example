@@ -1,0 +1,5 @@
+# Copy this file to .dev.vars in the backend directory.
+# Never commit the real .dev.vars file.
+
+TURSO_DATABASE_URL="libsql://your-database-name-your-org.turso.io"
+TURSO_AUTH_TOKEN="your-turso-auth-token"
