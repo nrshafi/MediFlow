@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router";
-import { Pause, Play, RotateCcw } from "lucide-react";
+import { Pause, Play, RotateCcw, StepBack, StepForward } from "lucide-react";
 import { useSim, formatSimClock } from "../store/SimContext";
 import {
   Tooltip,
@@ -58,12 +58,35 @@ function RoleSwitcher() {
 }
 
 function SimControls() {
-  const { state, play, pause, toggleSpeed, reset } = useSim();
-  const btn = "flex items-center justify-center rounded-md h-8 w-8 transition-colors";
+  const {
+    state,
+    play,
+    pause,
+    stepPrevious,
+    stepNext,
+    canStepPrevious,
+    toggleSpeed,
+    reset,
+  } = useSim();
+  const btn = "flex items-center justify-center rounded-md h-8 w-8 transition-colors disabled:cursor-not-allowed disabled:opacity-40";
   const btnStyle = { border: "1px solid var(--border-default)", color: "var(--text-primary)", backgroundColor: "var(--bg-surface)" };
   return (
     <TooltipProvider delayDuration={200}>
       <div className="flex items-center gap-1.5">
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <button
+              className={btn}
+              style={btnStyle}
+              onClick={stepPrevious}
+              disabled={!canStepPrevious}
+              aria-label="Go to previous simulation minute"
+            >
+              <StepBack className="h-4 w-4" />
+            </button>
+          </TooltipTrigger>
+          <TooltipContent>Previous minute</TooltipContent>
+        </Tooltip>
         <Tooltip>
           <TooltipTrigger asChild>
             <button className={btn} style={btnStyle} onClick={() => (state.playing ? pause() : play())} aria-label={state.playing ? "Pause simulation" : "Play simulation"}>
@@ -71,6 +94,19 @@ function SimControls() {
             </button>
           </TooltipTrigger>
           <TooltipContent>{state.playing ? "Pause" : "Play"}</TooltipContent>
+        </Tooltip>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <button
+              className={btn}
+              style={btnStyle}
+              onClick={stepNext}
+              aria-label="Go to next simulation minute"
+            >
+              <StepForward className="h-4 w-4" />
+            </button>
+          </TooltipTrigger>
+          <TooltipContent>Next minute</TooltipContent>
         </Tooltip>
         <Tooltip>
           <TooltipTrigger asChild>

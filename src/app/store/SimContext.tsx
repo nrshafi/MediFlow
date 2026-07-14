@@ -4,7 +4,7 @@ import {
   useContext,
   useEffect,
   useMemo,
-  useRef,
+  useReducer,
   useState,
 } from "react";
 import type { ReactNode } from "react";
@@ -15,6 +15,9 @@ interface SimContextValue {
   state: SimState;
   play: () => void;
   pause: () => void;
+  stepPrevious: () => void;
+  stepNext: () => void;
+  canStepPrevious: boolean;
   toggleSpeed: () => void;
   reset: () => void;
 }
@@ -23,45 +26,150 @@ const SimContext = createContext<SimContextValue | null>(null);
 
 const REAL_MS_PER_TICK = 3000; // 3 real seconds = +1 sim minute at 1×
 
+interface SimControllerState {
+  present: SimState;
+  past: SimState[];
+}
+
+type SimAction =
+  | { type: "finish-loading" }
+  | { type: "auto-step" }
+  | { type: "step-next" }
+  | { type: "step-previous" }
+  | { type: "play" }
+  | { type: "pause" }
+  | { type: "toggle-speed" }
+  | { type: "reset" };
+
+function advance(
+  controller: SimControllerState,
+  steps: number,
+  playing: boolean,
+): SimControllerState {
+  const past = [...controller.past];
+  let present = { ...controller.present, playing, loading: false };
+
+  for (let i = 0; i < steps; i += 1) {
+    past.push(present);
+    present = tick(present);
+  }
+
+  return { present: { ...present, playing }, past };
+}
+
+function simReducer(
+  controller: SimControllerState,
+  action: SimAction,
+): SimControllerState {
+  switch (action.type) {
+    case "finish-loading":
+      return controller.present.loading
+        ? advance(controller, 1, controller.present.playing)
+        : controller;
+    case "auto-step":
+      return controller.present.playing
+        ? advance(controller, controller.present.speed, true)
+        : controller;
+    case "step-next":
+      return advance(controller, 1, false);
+    case "step-previous": {
+      const previous = controller.past.at(-1);
+      if (!previous) {
+        return {
+          ...controller,
+          present: { ...controller.present, playing: false },
+        };
+      }
+      return {
+        present: {
+          ...previous,
+          playing: false,
+          speed: controller.present.speed,
+          loading: false,
+        },
+        past: controller.past.slice(0, -1),
+      };
+    }
+    case "play":
+      return {
+        ...controller,
+        present: { ...controller.present, playing: true },
+      };
+    case "pause":
+      return {
+        ...controller,
+        present: { ...controller.present, playing: false },
+      };
+    case "toggle-speed":
+      return {
+        ...controller,
+        present: {
+          ...controller.present,
+          speed: controller.present.speed === 1 ? 4 : 1,
+        },
+      };
+    case "reset":
+      return { present: initState(), past: [] };
+  }
+}
+
 export function SimProvider({ children }: { children: ReactNode }) {
-  const [state, setState] = useState<SimState>(() => initState());
-  const stateRef = useRef(state);
-  stateRef.current = state;
+  const [controller, dispatch] = useReducer(simReducer, undefined, () => ({
+    present: initState(),
+    past: [],
+  }));
+  const state = controller.present;
 
   // Initial "poll" skeleton, then first data.
   useEffect(() => {
-    const t = setTimeout(() => {
-      setState((s) => tick({ ...s, loading: false }));
+    const timeout = setTimeout(() => {
+      dispatch({ type: "finish-loading" });
     }, 600);
-    return () => clearTimeout(t);
+    return () => clearTimeout(timeout);
   }, []);
 
-  // Tick loop
+  // Automatic tick loop. The reducer reads the latest speed and play state.
   useEffect(() => {
     const interval = setInterval(() => {
-      const s = stateRef.current;
-      if (!s.playing) return;
-      const steps = s.speed; // 1× => +1 min, 4× => +4 min per real 3s
-      setState((prev) => {
-        let next = prev;
-        for (let i = 0; i < steps; i++) next = tick(next);
-        return next;
-      });
+      dispatch({ type: "auto-step" });
     }, REAL_MS_PER_TICK);
     return () => clearInterval(interval);
   }, []);
 
-  const play = useCallback(() => setState((s) => ({ ...s, playing: true })), []);
-  const pause = useCallback(() => setState((s) => ({ ...s, playing: false })), []);
-  const toggleSpeed = useCallback(
-    () => setState((s) => ({ ...s, speed: s.speed === 1 ? 4 : 1 })),
+  const play = useCallback(() => dispatch({ type: "play" }), []);
+  const pause = useCallback(() => dispatch({ type: "pause" }), []);
+  const stepPrevious = useCallback(
+    () => dispatch({ type: "step-previous" }),
     [],
   );
-  const reset = useCallback(() => setState(initState()), []);
+  const stepNext = useCallback(() => dispatch({ type: "step-next" }), []);
+  const toggleSpeed = useCallback(
+    () => dispatch({ type: "toggle-speed" }),
+    [],
+  );
+  const reset = useCallback(() => dispatch({ type: "reset" }), []);
 
   const value = useMemo(
-    () => ({ state, play, pause, toggleSpeed, reset }),
-    [state, play, pause, toggleSpeed, reset],
+    () => ({
+      state,
+      play,
+      pause,
+      stepPrevious,
+      stepNext,
+      canStepPrevious: controller.past.length > 0,
+      toggleSpeed,
+      reset,
+    }),
+    [
+      state,
+      controller.past.length,
+      play,
+      pause,
+      stepPrevious,
+      stepNext,
+      toggleSpeed,
+      reset,
+    ],
   );
 
   return <SimContext.Provider value={value}>{children}</SimContext.Provider>;
@@ -73,7 +181,7 @@ export function useSim(): SimContextValue {
   return ctx;
 }
 
-// ── Role (STAFF / DOCTOR / PATIENT) persisted to localStorage ──
+// Role (STAFF / DOCTOR / PATIENT) persisted to localStorage
 export type Role = "staff" | "doctor" | "patient";
 const ROLE_KEY = "mediflow.role";
 
@@ -94,7 +202,7 @@ export function usePersistedRole(): [Role, (r: Role) => void] {
   return [role, update];
 }
 
-// ── Sim clock formatting ──
+// Sim clock formatting
 export function formatSimClock(minute: number): string {
   const total = 9 * 60 + minute; // start 09:00
   const h24 = Math.floor(total / 60) % 24;

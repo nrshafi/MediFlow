@@ -12,6 +12,7 @@ Update this file after every meaningful implementation change.
 
 ## Completed
 
+- 2026-07-14 - Added manual previous/next minute controls beside simulation playback, with reversible state history and automatic pausing during manual steps
 - 2026-07-14 - Removed the top-bar "ORCHESTRATION LIVE" status label
 - 2026-07-14 - Removed the animated ECG pulse strip beneath the application top bar
 - 2026-07-14 - Removed dormant generated UI components, unused styling/config artifacts, and 43 unused runtime dependencies; synchronized the npm manifest with the lockfile
@@ -57,6 +58,7 @@ Update this file after every meaningful implementation change.
 
 ## Session Notes
 
+- 2026-07-14: Simulation playback now records each deterministic minute (including individual minutes at 4× speed), allowing the top-bar previous/next controls to move one minute at a time; manual stepping pauses auto-run and reset clears the history.
 - 2026-07-14: Removed the top-bar orchestration status label while retaining the shared pulse indicator used in staff and patient views.
 - 2026-07-14: Removed the unused `EcgPulse` render and component after the animated SVG strip was removed from the top bar.
 - 2026-07-14: After cleanup, `npm ci` completed with zero vulnerabilities, `npm run build` passed, and the Vite development server returned HTTP 200 at `http://127.0.0.1:5173/`.
