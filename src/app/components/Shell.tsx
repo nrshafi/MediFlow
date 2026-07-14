@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router";
 import { Pause, Play, RotateCcw } from "lucide-react";
 import { useSim, formatSimClock } from "../store/SimContext";
-import { EcgPulse } from "./EcgPulse";
 import {
   Tooltip,
   TooltipContent,
@@ -120,9 +119,6 @@ export function TopBar() {
             <span style={{ color: "var(--text-primary)" }}>Medi</span>
             <span style={{ color: "var(--accent-primary)" }}>Flow</span>
           </span>
-          <span className="hidden sm:inline-flex items-center gap-1.5 font-mono uppercase" style={{ fontSize: "10px", letterSpacing: "0.14em", color: "var(--text-muted)" }}>
-            <PulseDot /> ORCHESTRATION LIVE
-          </span>
         </div>
         <div className="order-3 w-full sm:order-2 sm:w-auto flex justify-center">
           <RoleSwitcher />
@@ -132,7 +128,6 @@ export function TopBar() {
           <SimControls />
         </div>
       </div>
-      <EcgPulse />
     </header>
   );
 }
