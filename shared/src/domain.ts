@@ -1,20 +1,46 @@
-export type Priority = "normal" | "urgent";
+export const PRIORITIES = ["normal", "urgent"] as const;
+export type Priority = (typeof PRIORITIES)[number];
 
-export type ServiceKind = "consultation" | "lab" | "xray" | "ecg";
+export const SERVICE_KINDS = ["consultation", "lab", "xray", "ecg"] as const;
+export type ServiceKind = (typeof SERVICE_KINDS)[number];
 
-export type ResourceType = "doctor" | "lab" | "xray" | "ecg";
+export const RESOURCE_TYPES = ["doctor", "lab", "xray", "ecg"] as const;
+export type ResourceType = (typeof RESOURCE_TYPES)[number];
 
-export type ResourceStatus = "available" | "busy" | "congested";
+export const RESOURCE_STATUSES = ["available", "busy", "congested"] as const;
+export type ResourceStatus = (typeof RESOURCE_STATUSES)[number];
 
-export type Stage =
-  | "registration"
-  | "lab"
-  | "xray"
-  | "ecg"
-  | "consultation"
-  | "pharmacy"
-  | "billing"
-  | "done";
+export const STAGES = [
+  "registration",
+  "lab",
+  "xray",
+  "ecg",
+  "consultation",
+  "pharmacy",
+  "billing",
+  "done",
+] as const;
+export type Stage = (typeof STAGES)[number];
+
+export const GENDERS = ["male", "female"] as const;
+export type Gender = (typeof GENDERS)[number];
+
+export const ALLERGY_SEVERITIES = ["mild", "moderate", "severe"] as const;
+export type AllergySeverity = (typeof ALLERGY_SEVERITIES)[number];
+
+export const TEST_RESULT_FLAGS = ["normal", "abnormal"] as const;
+export type TestResultFlag = (typeof TEST_RESULT_FLAGS)[number];
+
+export const SIMULATION_EVENT_TYPES = [
+  "simulation_initialized",
+  "clock_advanced",
+  "patient_arrived",
+  "patient_queued",
+  "service_started",
+  "service_completed",
+  "recommendation_created",
+] as const;
+export type SimulationEventType = (typeof SIMULATION_EVENT_TYPES)[number];
 
 export interface Diagnosis {
   condition: string;
@@ -30,14 +56,14 @@ export interface Medication {
 export interface Allergy {
   substance: string;
   reaction: string;
-  severity: "mild" | "moderate" | "severe";
+  severity: AllergySeverity;
 }
 
 export interface TestResult {
   test: string;
   value: string;
   date: string;
-  flag: "normal" | "abnormal";
+  flag: TestResultFlag;
 }
 
 export interface Treatment {
@@ -71,7 +97,7 @@ export interface Patient {
   token: string;
   name: string;
   age: number;
-  gender: "male" | "female";
+  gender: Gender;
   arrivalTime: number; // sim minute from 09:00
   priority: Priority;
   requiredServices: RequiredService[];

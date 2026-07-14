@@ -28,8 +28,18 @@ The npm-workspace monorepo layout was implemented on 2026-07-15.
 ## Storage Model
 
 - **Turso (SQLite)**: everything persistent — resource definitions (3 doctors, 1 lab, 1 X-ray, 1 ECG) and live status, simulated patients with medical histories, queue/visit state, scheduling events, cached LLM outputs, metric snapshots
+- **Normalized operational schema**: static resource definitions are separated from mutable resource state and queue positions; patient identity/visit state is separated from required services, timeline entries, and the five medical-history record types. Simulation events, metric snapshots, and cached LLM text use append-oriented tables so scheduling decisions remain auditable.
+- **Development lifecycle**: Drizzle Kit generates committed SQLite migrations from `backend/src/db/schema.ts`; a Node-only seed command applies pending migrations and replaces simulation data with the canonical deterministic fixture. Worker request code never runs migrations or seeds.
 - **No blob/file storage**: the MVP produces no files or media; LLM outputs are short text stored inline
 - **Simulated data only**: seed scripts generate all patients and histories — no real patient records anywhere
+
+## Simulation Tick Semantics
+
+- `POST /api/simulation/tick` advances the persistent clock by exactly one simulated minute. Playback speed remains a client concern: 4× playback issues ticks more frequently rather than skipping intermediate minutes.
+- Each tick is planned deterministically from the current persisted state and applied as one atomic libSQL batch. A unique `clock_advanced` event for the target minute provides optimistic concurrency protection, so concurrent requests cannot advance the same minute twice.
+- Within a minute, the clock event is recorded first, due active services are completed in patient-ID order, and newly due arrivals are registered in patient-ID order. Event rows carry an explicit order within their simulation minute.
+- Completing a service clears the patient/resource active-service state, closes the open timeline entry, and marks the matching required service complete. It does **not** choose or queue the next service; that remains the deterministic scheduling engine's responsibility in the following feature unit.
+- `GET /api/simulation` returns the persisted clock plus patient counts. No request handler owns a timer or performs background work.
 
 ## Auth and Access Model
 

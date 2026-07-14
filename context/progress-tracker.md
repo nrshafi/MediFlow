@@ -4,13 +4,17 @@ Update this file after every meaningful implementation change.
 
 ## Current Phase
 
-- Phase 1 complete — monorepo scaffold and build foundation verified
+- Phase 3 complete — persistent one-minute simulation clock and arrival/completion events verified
 
 ## Current Goal
 
-- Build the Turso data model and deterministic resource/patient seeds
+- Resolve priority semantics, then build deterministic scheduling engine v1
 
 ## Completed
+
+- 2026-07-15 - Added the persistent deterministic simulation clock, pure one-minute tick planning, atomic arrival/service-completion transitions, ordered audit events with concurrent-tick protection, and `GET /api/simulation` plus `POST /api/simulation/tick`; verified state transitions and HTTP responses through the generated migration with six passing backend tests
+
+- 2026-07-15 - Added the normalized Turso/Drizzle schema, initial 15-table SQLite migration, canonical deterministic seed (3 doctors, lab, X-ray, ECG, and 30 simulated patients with histories), reset-and-seed CLI, database constraints/indexes, and migration/seed integration tests; added tests to CI and verified a clean install, all workspace checks/tests, and production builds
 
 - 2026-07-15 - Documented local Worker secrets in `backend/.dev.vars.example` and expanded Git ignores to protect environment-specific `.dev.vars` and `.env` files
 
@@ -35,13 +39,12 @@ Update this file after every meaningful implementation change.
 
 ## Next Up
 
-1. Data model + seeds: resources (3 doctors, 1 lab, 1 X-ray, 1 ECG) and 20–50 simulated patients with histories
-2. Simulation clock + patient arrival / stage-completion events
-3. Deterministic scheduling engine v1 — next-step recommendation per patient
-4. Live Resource Dashboard v1 — resource status, queues, wait estimates (polling)
-5. Queue prediction + bottleneck detection
-6. LLM explanation layer, then pre-consultation summaries (Gemini)
-7. Before/after impact metrics vs. uncoordinated baseline
+1. Resolve priority-level scheduling semantics
+2. Deterministic scheduling engine v1 — next-step recommendation per patient
+3. Live Resource Dashboard v1 — resource status, queues, wait estimates (polling)
+4. Queue prediction + bottleneck detection
+5. LLM explanation layer, then pre-consultation summaries (Gemini)
+6. Before/after impact metrics vs. uncoordinated baseline
 
 ## Open Questions
 
@@ -52,6 +55,8 @@ Update this file after every meaningful implementation change.
 
 - **npm-workspace monorepo** with `frontend/`, `backend/`, and `shared/` boundaries; the existing React prototype is preserved in the frontend workspace *(implemented 2026-07-15)*
 - **Drizzle ORM over the libSQL client for Turso access**; database construction stays in `backend/src/db/` and credentials remain Worker bindings *(implemented 2026-07-15)*
+- **Normalized Turso schema with committed Drizzle migrations**; static resources, mutable resource/queue state, patient services/timelines/history, simulation events, metric snapshots, and cached LLM text remain separate. Migrations and deterministic reset-seeding are Node-only development commands and never run in Worker requests *(implemented 2026-07-15)*
+- **One-minute atomic simulation ticks**; the API never skips minutes or runs a background timer. Each tick records a unique clock event, completes due services, registers due arrivals, and leaves next-service selection to the scheduler. Event ordering is persisted and concurrent duplicate ticks roll back *(implemented 2026-07-15)*
 - **Deterministic rule-based scheduler; LLM is language-only** — explainable and safe for healthcare; no black-box medical decisions; no ML-training or dataset risk *(from the brief)*
 - **Overlay architecture** — sits on top of existing hospital systems; consumes only resource status + service-duration estimates; low-friction adoption *(from the brief)*
 - **Cloudflare Pages + Workers + Turso + GitHub** — the standard low-cost edge web stack specified in the brief
@@ -62,6 +67,10 @@ Update this file after every meaningful implementation change.
 - **Tailwind CSS + shadcn/ui** as the component layer *(decided 2026-07-14)*
 
 ## Session Notes
+
+- 2026-07-15: Completed the simulation clock/event phase. A tick advances one minute and atomically updates clock, arrival registration/timeline state, active service/resource completion state, required-service completion, and ordered events. The read/tick endpoints are covered through the Hono app with an injected in-memory libSQL database. All workspace checks, six tests, and production builds pass.
+
+- 2026-07-15: Completed the data-model and seed phase. The canonical seed is reproducible from integer seed `20260714`, contains 6 resources and 30 simulated patients, and can be reset idempotently after pending migrations are applied. `npm ci`, `npm run check`, `npm test`, and `npm run build` pass. Production dependencies audit clean; Drizzle Kit retains four moderate development-only advisories through its deprecated esbuild loader, with no non-breaking stable upgrade currently available.
 
 - 2026-07-15: Completed the scaffold phase. `npm run check` passes for all three workspaces, and `npm run build` produces the Vite frontend bundle plus a successful Wrangler dry-run Worker bundle. Turso credentials are intentionally left for local/deployment environment configuration and are not required for the scaffold build.
 

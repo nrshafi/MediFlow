@@ -1,0 +1,1463 @@
+{
+  "version": "6",
+  "dialect": "sqlite",
+  "id": "7baf6db1-7230-4d9d-8be9-0f1a195cd35c",
+  "prevId": "00000000-0000-0000-0000-000000000000",
+  "tables": {
+    "allergies": {
+      "name": "allergies",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "patient_id": {
+          "name": "patient_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "substance": {
+          "name": "substance",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "reaction": {
+          "name": "reaction",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "severity": {
+          "name": "severity",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "allergies_patient_idx": {
+          "name": "allergies_patient_idx",
+          "columns": [
+            "patient_id"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "allergies_patient_id_patients_id_fk": {
+          "name": "allergies_patient_id_patients_id_fk",
+          "tableFrom": "allergies",
+          "tableTo": "patients",
+          "columnsFrom": [
+            "patient_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "allergies_severity_valid": {
+          "name": "allergies_severity_valid",
+          "value": "\"allergies\".\"severity\" in ('mild', 'moderate', 'severe')"
+        }
+      }
+    },
+    "diagnoses": {
+      "name": "diagnoses",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "patient_id": {
+          "name": "patient_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "condition": {
+          "name": "condition",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "year": {
+          "name": "year",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "diagnoses_patient_idx": {
+          "name": "diagnoses_patient_idx",
+          "columns": [
+            "patient_id"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "diagnoses_patient_id_patients_id_fk": {
+          "name": "diagnoses_patient_id_patients_id_fk",
+          "tableFrom": "diagnoses",
+          "tableTo": "patients",
+          "columnsFrom": [
+            "patient_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "llm_outputs": {
+      "name": "llm_outputs",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "cache_key": {
+          "name": "cache_key",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "patient_id": {
+          "name": "patient_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "kind": {
+          "name": "kind",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "source_hash": {
+          "name": "source_hash",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "content": {
+          "name": "content",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "provider": {
+          "name": "provider",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "model": {
+          "name": "model",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "CURRENT_TIMESTAMP"
+        }
+      },
+      "indexes": {
+        "llm_outputs_cache_key_unique": {
+          "name": "llm_outputs_cache_key_unique",
+          "columns": [
+            "cache_key"
+          ],
+          "isUnique": true
+        },
+        "llm_outputs_patient_kind_idx": {
+          "name": "llm_outputs_patient_kind_idx",
+          "columns": [
+            "patient_id",
+            "kind"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "llm_outputs_patient_id_patients_id_fk": {
+          "name": "llm_outputs_patient_id_patients_id_fk",
+          "tableFrom": "llm_outputs",
+          "tableTo": "patients",
+          "columnsFrom": [
+            "patient_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "llm_outputs_kind_valid": {
+          "name": "llm_outputs_kind_valid",
+          "value": "\"llm_outputs\".\"kind\" in ('recommendation_explanation', 'doctor_brief')"
+        }
+      }
+    },
+    "medications": {
+      "name": "medications",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "patient_id": {
+          "name": "patient_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "dose": {
+          "name": "dose",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "frequency": {
+          "name": "frequency",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "medications_patient_idx": {
+          "name": "medications_patient_idx",
+          "columns": [
+            "patient_id"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "medications_patient_id_patients_id_fk": {
+          "name": "medications_patient_id_patients_id_fk",
+          "tableFrom": "medications",
+          "tableTo": "patients",
+          "columnsFrom": [
+            "patient_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "metric_snapshots": {
+      "name": "metric_snapshots",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "simulation_minute": {
+          "name": "simulation_minute",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "kind": {
+          "name": "kind",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "avg_wait_min": {
+          "name": "avg_wait_min",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "avg_visit_min": {
+          "name": "avg_visit_min",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "utilization_pct": {
+          "name": "utilization_pct",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "patients_in_house": {
+          "name": "patients_in_house",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "completed": {
+          "name": "completed",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "CURRENT_TIMESTAMP"
+        }
+      },
+      "indexes": {
+        "metric_snapshots_kind_minute_unique": {
+          "name": "metric_snapshots_kind_minute_unique",
+          "columns": [
+            "kind",
+            "simulation_minute"
+          ],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "metric_snapshots_kind_valid": {
+          "name": "metric_snapshots_kind_valid",
+          "value": "\"metric_snapshots\".\"kind\" in ('live', 'baseline')"
+        },
+        "metric_snapshots_minute_nonnegative": {
+          "name": "metric_snapshots_minute_nonnegative",
+          "value": "\"metric_snapshots\".\"simulation_minute\" >= 0"
+        },
+        "metric_snapshots_wait_nonnegative": {
+          "name": "metric_snapshots_wait_nonnegative",
+          "value": "\"metric_snapshots\".\"avg_wait_min\" >= 0"
+        },
+        "metric_snapshots_visit_nonnegative": {
+          "name": "metric_snapshots_visit_nonnegative",
+          "value": "\"metric_snapshots\".\"avg_visit_min\" >= 0"
+        },
+        "metric_snapshots_utilization_valid": {
+          "name": "metric_snapshots_utilization_valid",
+          "value": "\"metric_snapshots\".\"utilization_pct\" between 0 and 100"
+        },
+        "metric_snapshots_patients_in_house_nonnegative": {
+          "name": "metric_snapshots_patients_in_house_nonnegative",
+          "value": "\"metric_snapshots\".\"patients_in_house\" >= 0"
+        },
+        "metric_snapshots_completed_nonnegative": {
+          "name": "metric_snapshots_completed_nonnegative",
+          "value": "\"metric_snapshots\".\"completed\" >= 0"
+        }
+      }
+    },
+    "patient_timeline": {
+      "name": "patient_timeline",
+      "columns": {
+        "patient_id": {
+          "name": "patient_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "position": {
+          "name": "position",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "stage": {
+          "name": "stage",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "started_at_minute": {
+          "name": "started_at_minute",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "ended_at_minute": {
+          "name": "ended_at_minute",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "patient_timeline_patient_id_patients_id_fk": {
+          "name": "patient_timeline_patient_id_patients_id_fk",
+          "tableFrom": "patient_timeline",
+          "tableTo": "patients",
+          "columnsFrom": [
+            "patient_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "patient_timeline_patient_id_position_pk": {
+          "columns": [
+            "patient_id",
+            "position"
+          ],
+          "name": "patient_timeline_patient_id_position_pk"
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "patient_timeline_position_nonnegative": {
+          "name": "patient_timeline_position_nonnegative",
+          "value": "\"patient_timeline\".\"position\" >= 0"
+        },
+        "patient_timeline_stage_valid": {
+          "name": "patient_timeline_stage_valid",
+          "value": "\"patient_timeline\".\"stage\" in ('registration', 'lab', 'xray', 'ecg', 'consultation', 'pharmacy', 'billing', 'done')"
+        },
+        "patient_timeline_order_valid": {
+          "name": "patient_timeline_order_valid",
+          "value": "\"patient_timeline\".\"ended_at_minute\" is null or \"patient_timeline\".\"started_at_minute\" is null or \"patient_timeline\".\"ended_at_minute\" >= \"patient_timeline\".\"started_at_minute\""
+        }
+      }
+    },
+    "patients": {
+      "name": "patients",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "token": {
+          "name": "token",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "age": {
+          "name": "age",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "gender": {
+          "name": "gender",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "arrival_minute": {
+          "name": "arrival_minute",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "priority": {
+          "name": "priority",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "estimated_consultation_duration": {
+          "name": "estimated_consultation_duration",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "current_stage": {
+          "name": "current_stage",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'registration'"
+        },
+        "queue_position": {
+          "name": "queue_position",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        },
+        "service_ends_at_minute": {
+          "name": "service_ends_at_minute",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "current_resource_id": {
+          "name": "current_resource_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "completed_at_minute": {
+          "name": "completed_at_minute",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "waited_min": {
+          "name": "waited_min",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        },
+        "served_min": {
+          "name": "served_min",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        },
+        "registered": {
+          "name": "registered",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "CURRENT_TIMESTAMP"
+        }
+      },
+      "indexes": {
+        "patients_token_unique": {
+          "name": "patients_token_unique",
+          "columns": [
+            "token"
+          ],
+          "isUnique": true
+        },
+        "patients_arrival_minute_idx": {
+          "name": "patients_arrival_minute_idx",
+          "columns": [
+            "arrival_minute"
+          ],
+          "isUnique": false
+        },
+        "patients_current_resource_idx": {
+          "name": "patients_current_resource_idx",
+          "columns": [
+            "current_resource_id"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "patients_current_resource_id_resources_id_fk": {
+          "name": "patients_current_resource_id_resources_id_fk",
+          "tableFrom": "patients",
+          "tableTo": "resources",
+          "columnsFrom": [
+            "current_resource_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "patients_age_valid": {
+          "name": "patients_age_valid",
+          "value": "\"patients\".\"age\" between 0 and 120"
+        },
+        "patients_gender_valid": {
+          "name": "patients_gender_valid",
+          "value": "\"patients\".\"gender\" in ('male', 'female')"
+        },
+        "patients_priority_valid": {
+          "name": "patients_priority_valid",
+          "value": "\"patients\".\"priority\" in ('normal', 'urgent')"
+        },
+        "patients_current_stage_valid": {
+          "name": "patients_current_stage_valid",
+          "value": "\"patients\".\"current_stage\" in ('registration', 'lab', 'xray', 'ecg', 'consultation', 'pharmacy', 'billing', 'done')"
+        },
+        "patients_arrival_minute_nonnegative": {
+          "name": "patients_arrival_minute_nonnegative",
+          "value": "\"patients\".\"arrival_minute\" >= 0"
+        },
+        "patients_consultation_duration_positive": {
+          "name": "patients_consultation_duration_positive",
+          "value": "\"patients\".\"estimated_consultation_duration\" > 0"
+        },
+        "patients_queue_position_nonnegative": {
+          "name": "patients_queue_position_nonnegative",
+          "value": "\"patients\".\"queue_position\" >= 0"
+        },
+        "patients_waited_min_nonnegative": {
+          "name": "patients_waited_min_nonnegative",
+          "value": "\"patients\".\"waited_min\" >= 0"
+        },
+        "patients_served_min_nonnegative": {
+          "name": "patients_served_min_nonnegative",
+          "value": "\"patients\".\"served_min\" >= 0"
+        }
+      }
+    },
+    "required_services": {
+      "name": "required_services",
+      "columns": {
+        "patient_id": {
+          "name": "patient_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "position": {
+          "name": "position",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "kind": {
+          "name": "kind",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "doctor_id": {
+          "name": "doctor_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "completed": {
+          "name": "completed",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": false
+        }
+      },
+      "indexes": {
+        "required_services_doctor_idx": {
+          "name": "required_services_doctor_idx",
+          "columns": [
+            "doctor_id"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "required_services_patient_id_patients_id_fk": {
+          "name": "required_services_patient_id_patients_id_fk",
+          "tableFrom": "required_services",
+          "tableTo": "patients",
+          "columnsFrom": [
+            "patient_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "required_services_doctor_id_resources_id_fk": {
+          "name": "required_services_doctor_id_resources_id_fk",
+          "tableFrom": "required_services",
+          "tableTo": "resources",
+          "columnsFrom": [
+            "doctor_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "required_services_patient_id_position_pk": {
+          "columns": [
+            "patient_id",
+            "position"
+          ],
+          "name": "required_services_patient_id_position_pk"
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "required_services_position_nonnegative": {
+          "name": "required_services_position_nonnegative",
+          "value": "\"required_services\".\"position\" >= 0"
+        },
+        "required_services_kind_valid": {
+          "name": "required_services_kind_valid",
+          "value": "\"required_services\".\"kind\" in ('consultation', 'lab', 'xray', 'ecg')"
+        },
+        "required_services_doctor_consistency": {
+          "name": "required_services_doctor_consistency",
+          "value": "(\"required_services\".\"kind\" = 'consultation' and \"required_services\".\"doctor_id\" is not null) or (\"required_services\".\"kind\" <> 'consultation' and \"required_services\".\"doctor_id\" is null)"
+        }
+      }
+    },
+    "resource_queue": {
+      "name": "resource_queue",
+      "columns": {
+        "resource_id": {
+          "name": "resource_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "patient_id": {
+          "name": "patient_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "position": {
+          "name": "position",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "enqueued_at_minute": {
+          "name": "enqueued_at_minute",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "resource_queue_position_unique": {
+          "name": "resource_queue_position_unique",
+          "columns": [
+            "resource_id",
+            "position"
+          ],
+          "isUnique": true
+        },
+        "resource_queue_patient_idx": {
+          "name": "resource_queue_patient_idx",
+          "columns": [
+            "patient_id"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "resource_queue_resource_id_resources_id_fk": {
+          "name": "resource_queue_resource_id_resources_id_fk",
+          "tableFrom": "resource_queue",
+          "tableTo": "resources",
+          "columnsFrom": [
+            "resource_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "resource_queue_patient_id_patients_id_fk": {
+          "name": "resource_queue_patient_id_patients_id_fk",
+          "tableFrom": "resource_queue",
+          "tableTo": "patients",
+          "columnsFrom": [
+            "patient_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "resource_queue_resource_id_patient_id_pk": {
+          "columns": [
+            "resource_id",
+            "patient_id"
+          ],
+          "name": "resource_queue_resource_id_patient_id_pk"
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "resource_queue_position_positive": {
+          "name": "resource_queue_position_positive",
+          "value": "\"resource_queue\".\"position\" > 0"
+        },
+        "resource_queue_enqueued_minute_nonnegative": {
+          "name": "resource_queue_enqueued_minute_nonnegative",
+          "value": "\"resource_queue\".\"enqueued_at_minute\" >= 0"
+        }
+      }
+    },
+    "resource_state": {
+      "name": "resource_state",
+      "columns": {
+        "resource_id": {
+          "name": "resource_id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "status": {
+          "name": "status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'available'"
+        },
+        "current_patient_id": {
+          "name": "current_patient_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "predicted_wait_min": {
+          "name": "predicted_wait_min",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        },
+        "utilization_pct": {
+          "name": "utilization_pct",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        },
+        "busy_minutes": {
+          "name": "busy_minutes",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "CURRENT_TIMESTAMP"
+        }
+      },
+      "indexes": {
+        "resource_state_current_patient_idx": {
+          "name": "resource_state_current_patient_idx",
+          "columns": [
+            "current_patient_id"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "resource_state_resource_id_resources_id_fk": {
+          "name": "resource_state_resource_id_resources_id_fk",
+          "tableFrom": "resource_state",
+          "tableTo": "resources",
+          "columnsFrom": [
+            "resource_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "resource_state_current_patient_id_patients_id_fk": {
+          "name": "resource_state_current_patient_id_patients_id_fk",
+          "tableFrom": "resource_state",
+          "tableTo": "patients",
+          "columnsFrom": [
+            "current_patient_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "resource_state_status_valid": {
+          "name": "resource_state_status_valid",
+          "value": "\"resource_state\".\"status\" in ('available', 'busy', 'congested')"
+        },
+        "resource_state_predicted_wait_nonnegative": {
+          "name": "resource_state_predicted_wait_nonnegative",
+          "value": "\"resource_state\".\"predicted_wait_min\" >= 0"
+        },
+        "resource_state_utilization_valid": {
+          "name": "resource_state_utilization_valid",
+          "value": "\"resource_state\".\"utilization_pct\" between 0 and 100"
+        },
+        "resource_state_busy_minutes_nonnegative": {
+          "name": "resource_state_busy_minutes_nonnegative",
+          "value": "\"resource_state\".\"busy_minutes\" >= 0"
+        }
+      }
+    },
+    "resources": {
+      "name": "resources",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "type": {
+          "name": "type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "specialty": {
+          "name": "specialty",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "tag": {
+          "name": "tag",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "service_duration_min": {
+          "name": "service_duration_min",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "resources_tag_unique": {
+          "name": "resources_tag_unique",
+          "columns": [
+            "tag"
+          ],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "resources_type_valid": {
+          "name": "resources_type_valid",
+          "value": "\"resources\".\"type\" in ('doctor', 'lab', 'xray', 'ecg')"
+        },
+        "resources_service_duration_valid": {
+          "name": "resources_service_duration_valid",
+          "value": "(\"resources\".\"type\" = 'doctor' and \"resources\".\"service_duration_min\" is null) or (\"resources\".\"type\" <> 'doctor' and \"resources\".\"service_duration_min\" > 0)"
+        }
+      }
+    },
+    "simulation_events": {
+      "name": "simulation_events",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "simulation_minute": {
+          "name": "simulation_minute",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "type": {
+          "name": "type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "order_in_minute": {
+          "name": "order_in_minute",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "patient_id": {
+          "name": "patient_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "resource_id": {
+          "name": "resource_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "payload": {
+          "name": "payload",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "CURRENT_TIMESTAMP"
+        }
+      },
+      "indexes": {
+        "simulation_events_minute_idx": {
+          "name": "simulation_events_minute_idx",
+          "columns": [
+            "simulation_minute"
+          ],
+          "isUnique": false
+        },
+        "simulation_events_minute_order_unique": {
+          "name": "simulation_events_minute_order_unique",
+          "columns": [
+            "simulation_minute",
+            "order_in_minute"
+          ],
+          "isUnique": true
+        },
+        "simulation_events_patient_idx": {
+          "name": "simulation_events_patient_idx",
+          "columns": [
+            "patient_id"
+          ],
+          "isUnique": false
+        },
+        "simulation_events_resource_idx": {
+          "name": "simulation_events_resource_idx",
+          "columns": [
+            "resource_id"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "simulation_events_patient_id_patients_id_fk": {
+          "name": "simulation_events_patient_id_patients_id_fk",
+          "tableFrom": "simulation_events",
+          "tableTo": "patients",
+          "columnsFrom": [
+            "patient_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "simulation_events_resource_id_resources_id_fk": {
+          "name": "simulation_events_resource_id_resources_id_fk",
+          "tableFrom": "simulation_events",
+          "tableTo": "resources",
+          "columnsFrom": [
+            "resource_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "simulation_events_type_valid": {
+          "name": "simulation_events_type_valid",
+          "value": "\"simulation_events\".\"type\" in ('simulation_initialized', 'clock_advanced', 'patient_arrived', 'patient_queued', 'service_started', 'service_completed', 'recommendation_created')"
+        },
+        "simulation_events_minute_nonnegative": {
+          "name": "simulation_events_minute_nonnegative",
+          "value": "\"simulation_events\".\"simulation_minute\" >= 0"
+        },
+        "simulation_events_order_nonnegative": {
+          "name": "simulation_events_order_nonnegative",
+          "value": "\"simulation_events\".\"order_in_minute\" >= 0"
+        }
+      }
+    },
+    "simulation_state": {
+      "name": "simulation_state",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "minute": {
+          "name": "minute",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        },
+        "playback_status": {
+          "name": "playback_status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'paused'"
+        },
+        "speed": {
+          "name": "speed",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 1
+        },
+        "seed": {
+          "name": "seed",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "CURRENT_TIMESTAMP"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "simulation_state_minute_nonnegative": {
+          "name": "simulation_state_minute_nonnegative",
+          "value": "\"simulation_state\".\"minute\" >= 0"
+        },
+        "simulation_state_playback_status_valid": {
+          "name": "simulation_state_playback_status_valid",
+          "value": "\"simulation_state\".\"playback_status\" in ('paused', 'playing')"
+        },
+        "simulation_state_speed_valid": {
+          "name": "simulation_state_speed_valid",
+          "value": "\"simulation_state\".\"speed\" in (1, 4)"
+        }
+      }
+    },
+    "test_results": {
+      "name": "test_results",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "patient_id": {
+          "name": "patient_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "test": {
+          "name": "test",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "value": {
+          "name": "value",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "date": {
+          "name": "date",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "flag": {
+          "name": "flag",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "test_results_patient_idx": {
+          "name": "test_results_patient_idx",
+          "columns": [
+            "patient_id"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "test_results_patient_id_patients_id_fk": {
+          "name": "test_results_patient_id_patients_id_fk",
+          "tableFrom": "test_results",
+          "tableTo": "patients",
+          "columnsFrom": [
+            "patient_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "test_results_flag_valid": {
+          "name": "test_results_flag_valid",
+          "value": "\"test_results\".\"flag\" in ('normal', 'abnormal')"
+        }
+      }
+    },
+    "treatments": {
+      "name": "treatments",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "patient_id": {
+          "name": "patient_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "procedure": {
+          "name": "procedure",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "date": {
+          "name": "date",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "note": {
+          "name": "note",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "treatments_patient_idx": {
+          "name": "treatments_patient_idx",
+          "columns": [
+            "patient_id"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "treatments_patient_id_patients_id_fk": {
+          "name": "treatments_patient_id_patients_id_fk",
+          "tableFrom": "treatments",
+          "tableTo": "patients",
+          "columnsFrom": [
+            "patient_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    }
+  },
+  "views": {},
+  "enums": {},
+  "_meta": {
+    "schemas": {},
+    "tables": {},
+    "columns": {}
+  },
+  "internal": {
+    "indexes": {}
+  }
+}

@@ -5,4 +5,5 @@ backend/.dev.vars*
 !backend/.dev.vars.example
 backend/.env*
 !backend/.env.example
+backend/.seed-test.db*
 *.log

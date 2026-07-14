@@ -1,7 +1,20 @@
+export {
+  ALLERGY_SEVERITIES,
+  GENDERS,
+  PRIORITIES,
+  RESOURCE_STATUSES,
+  RESOURCE_TYPES,
+  SERVICE_KINDS,
+  SIMULATION_EVENT_TYPES,
+  STAGES,
+  TEST_RESULT_FLAGS,
+} from "./domain";
 export type {
   Allergy,
+  AllergySeverity,
   BottleneckAlert,
   Diagnosis,
+  Gender,
   Medication,
   Metrics,
   MetricsBlock,
@@ -14,9 +27,11 @@ export type {
   ResourceStatus,
   ResourceType,
   ServiceKind,
+  SimulationEventType,
   SimState,
   Stage,
   TestResult,
+  TestResultFlag,
   TimelineEvent,
   Treatment,
 } from "./domain";
@@ -25,4 +40,7 @@ export type {
   ApiErrorDetail,
   ApiSuccess,
   HealthStatus,
+  SimulationStatus,
+  SimulationTickEvent,
+  SimulationTickResult,
 } from "./contracts";
