@@ -30,7 +30,11 @@ export function recommendationSourceHash(
 }
 
 export function doctorBriefSourceHash(patient: Patient): string {
-  return stableSourceHash({ patientId: patient.id, history: patient.history });
+  return stableSourceHash({
+    formatVersion: 2,
+    patientId: patient.id,
+    history: patient.history,
+  });
 }
 
 async function cachedContent(

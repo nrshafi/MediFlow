@@ -5,6 +5,7 @@ import { useSim, formatSimClock } from "../store/SimContext";
 import type { Patient } from "../lib/types";
 import { MicroLabel, MonoTag, Panel, PriorityChip, GuardrailNote } from "../components/primitives";
 import { apiUrl } from "../lib/api";
+import { formatBriefContent } from "../lib/brief-format";
 
 export function DoctorBrief() {
   const { state } = useSim();
@@ -164,9 +165,13 @@ function Brief({ patient, minute, brief }: { patient: Patient; minute: number; b
 
       <Panel className="flex flex-col gap-3">
         <MicroLabel>PRE-CONSULTATION SUMMARY</MicroLabel>
-        <p style={{ fontSize: "14px", lineHeight: 1.7, color: "var(--text-primary)" }}>
-          {brief?.content ?? "Preparing the patient record summary…"}
-        </p>
+        {brief ? (
+          <BriefNarrative content={brief.content} />
+        ) : (
+          <p style={{ fontSize: "14px", lineHeight: 1.7, color: "var(--text-muted)" }}>
+            Preparing the patient record summary…
+          </p>
+        )}
       </Panel>
 
       {/* Allergies — full width, error tint */}
@@ -251,6 +256,79 @@ function Brief({ patient, minute, brief }: { patient: Patient; minute: number; b
         <GuardrailNote />
       </div>
     </section>
+  );
+}
+
+function BriefNarrative({ content }: { content: string }) {
+  const sections = formatBriefContent(content);
+
+  if (sections.length === 0) {
+    return (
+      <p style={{ fontSize: "14px", lineHeight: 1.7, color: "var(--text-muted)" }}>
+        No summary was returned.
+      </p>
+    );
+  }
+
+  return (
+    <div className="flex flex-col gap-2">
+      {sections.map((section, index) => {
+        if (!section.label) {
+          return (
+            <p
+              key={`summary-${index}`}
+              className="rounded-md border px-3 py-2.5"
+              style={{
+                borderColor: "var(--border-default)",
+                backgroundColor: "color-mix(in srgb, var(--accent-primary) 4%, transparent)",
+                color: "var(--text-primary)",
+                fontSize: "14px",
+                lineHeight: 1.7,
+              }}
+            >
+              {section.text}
+            </p>
+          );
+        }
+
+        const isAttention = section.tone === "attention";
+        return (
+          <div
+            key={`${section.label}-${index}`}
+            className="grid grid-cols-1 gap-1 rounded-md border px-3 py-2.5 sm:grid-cols-[minmax(150px,0.32fr)_1fr] sm:gap-4"
+            style={{
+              borderColor: isAttention
+                ? "color-mix(in srgb, var(--state-error) 45%, var(--border-default))"
+                : "var(--border-default)",
+              backgroundColor: isAttention
+                ? "color-mix(in srgb, var(--state-error) 6%, transparent)"
+                : "color-mix(in srgb, var(--accent-primary) 4%, transparent)",
+            }}
+          >
+            <span
+              className="font-mono uppercase"
+              style={{
+                color: isAttention ? "var(--state-error)" : "var(--accent-primary)",
+                fontSize: "10px",
+                letterSpacing: "0.1em",
+                lineHeight: 1.6,
+              }}
+            >
+              {section.label}
+            </span>
+            <span
+              style={{
+                color: "var(--text-primary)",
+                fontSize: "14px",
+                lineHeight: 1.6,
+              }}
+            >
+              {section.text}
+            </span>
+          </div>
+        );
+      })}
+    </div>
   );
 }
 

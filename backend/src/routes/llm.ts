@@ -21,18 +21,43 @@ function fallbackBrief(patient: Patient): string {
     : "none recorded";
   const diagnoses = patient.history.diagnoses.length
     ? patient.history.diagnoses
-        .map((diagnosis) => diagnosis.condition)
+        .map((diagnosis) => `${diagnosis.condition} (${diagnosis.year})`)
         .join(", ")
     : "none recorded";
   const medications = patient.history.medications.length
     ? patient.history.medications
-        .map((medication) => `${medication.name} ${medication.dose}`)
+        .map(
+          (medication) =>
+            `${medication.name} ${medication.dose}, ${medication.frequency}`,
+        )
         .join(", ")
     : "none recorded";
   const abnormalText = abnormal.length
-    ? abnormal.map((result) => `${result.test}: ${result.value}`).join(", ")
+    ? abnormal
+        .map((result) => `${result.test}: ${result.value} (${result.date})`)
+        .join(", ")
     : "none recorded";
-  return `Recorded allergies: ${allergies}. Previous diagnoses: ${diagnoses}. Current medications: ${medications}. Abnormal recent results: ${abnormalText}.`;
+  const recentTests = patient.history.recentTests.length
+    ? patient.history.recentTests
+        .map((result) => `${result.test}: ${result.value} (${result.date})`)
+        .join(", ")
+    : "none recorded";
+  const treatments = patient.history.treatments.length
+    ? patient.history.treatments
+        .map(
+          (treatment) =>
+            `${treatment.procedure} (${treatment.date}): ${treatment.note}`,
+        )
+        .join(", ")
+    : "none recorded";
+  return [
+    `Allergies: ${allergies}`,
+    `Abnormal results: ${abnormalText}`,
+    `Previous diagnoses: ${diagnoses}`,
+    `Current medications: ${medications}`,
+    `Recent tests: ${recentTests}`,
+    `Treatments: ${treatments}`,
+  ].join("\n");
 }
 
 export function createDoctorBriefHandler(

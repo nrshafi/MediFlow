@@ -22,7 +22,7 @@ export function doctorBriefPrompt(patient: Patient): {
   prompt: string;
 } {
   return {
-    system: `${LANGUAGE_ONLY_GUARDRAIL} Produce a concise pre-consultation record summary for a doctor. Highlight recorded allergies and abnormal results first. Do not infer diagnoses or recommend treatment. Clearly say when a category has no records.`,
+    system: `${LANGUAGE_ONLY_GUARDRAIL} Produce a concise pre-consultation record summary for a doctor. Highlight recorded allergies and abnormal results first. Do not infer diagnoses or recommend treatment. Return plain text only with no Markdown, bullets, or heading. Use exactly one line per category in this order: Allergies, Abnormal results, Previous diagnoses, Current medications, Recent tests, Treatments. Format every line as "Category: details" and clearly say "none recorded" when a category has no records.`,
     prompt: JSON.stringify({
       patient: {
         token: patient.token,

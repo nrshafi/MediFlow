@@ -4,13 +4,17 @@ Update this file after every meaningful implementation change.
 
 ## Current Phase
 
-- Phase 7 complete — deployed-demo reset and production verification
+- Phase 8 complete — Gemini brief presentation hardening
 
 ## Current Goal
 
-- Live shared demo is safely replayable from the Staff view and restored to the canonical minute-zero state
+- Live Gemini and fallback pre-consultation summaries render as readable, safety-preserving clinical sections
 
 ## Completed
+
+- 2026-07-15 - Deployed the formatted Doctor Brief UI and Worker prompt/cache update; production Gemini smoke testing returned six labeled lines with no Markdown markers, and the live Pages Doctor Brief chunk contains the safe section formatter
+
+- 2026-07-15 - Added a safe brief formatter that converts existing Gemini Markdown markers and the new line-based response format into labeled clinical rows without injecting HTML; constrained future Gemini briefs to six plain-text categories, versioned the source hash to invalidate old cached output, and aligned deterministic fallbacks with the same structure
 
 - 2026-07-15 - Deployed the protected reset Worker and production Pages bundle, verified the public site and API return HTTP 200, rejected an invalid reset credential with HTTP 401, exercised reset → tick → reset against production, confirmed a Gemini doctor brief, and left the shared 30-patient demo at minute zero
 
@@ -82,6 +86,8 @@ Update this file after every meaningful implementation change.
 - **Tailwind CSS + shadcn/ui** as the component layer *(decided 2026-07-14)*
 
 ## Session Notes
+
+- 2026-07-15: Gemini brief formatting deployed. Worker version `75f95ada-4442-4b0b-87d0-c60db31ca223` requests a six-line plain-text clinical summary and uses cache format version 2; the production Pages formatter also handles previously cached bold Markdown safely. Live patient `P-007` returned a Gemini brief with six expected categories and no raw Markdown syntax.
 
 - 2026-07-15: Demo reset hardening deployed. Worker version `d5c6ddeb-f702-4062-a462-40ec2a8b808b` serves the protected reset route; the production Pages bundle contains the Staff reset dialog. Production smoke testing verified unauthorized rejection, atomic minute-zero restoration, one-minute playback, Gemini brief generation, and a final clean reset to 0 arrived / 0 completed patients.
 
