@@ -82,10 +82,11 @@ export function StaffDashboard() {
       </div>
 
       {/* KPI strip */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
         <StatCard label="AVG WAIT" value={String(metrics.live.avgWaitMin)} unit="MIN" deltaPct={pct(metrics.live.avgWaitMin, metrics.baseline.avgWaitMin)} />
         <StatCard label="AVG VISIT DURATION" value={String(metrics.live.avgVisitMin)} unit="MIN" deltaPct={pct(metrics.live.avgVisitMin, metrics.baseline.avgVisitMin)} />
         <StatCard label="RESOURCE UTILIZATION" value={String(metrics.live.utilizationPct)} unit="%" deltaPct={pct(metrics.live.utilizationPct, metrics.baseline.utilizationPct)} lowerIsBetter={false} />
+        <StatCard label="AVG QUEUE DEPTH" value={String(metrics.live.avgQueueDepth)} deltaPct={pct(metrics.live.avgQueueDepth, metrics.baseline.avgQueueDepth)} />
         <StatCard label="PATIENTS IN-HOUSE" value={String(metrics.live.patientsInHouse)} footNote={`${metrics.live.completed} COMPLETED`} />
       </div>
 
@@ -145,7 +146,7 @@ export function StaffDashboard() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All stages</SelectItem>
-                {(["registration", "lab", "xray", "ecg", "consultation", "pharmacy", "billing"] as Stage[]).map((s) => (
+                {(["registration", "lab", "xray", "ecg", "consultation"] as Stage[]).map((s) => (
                   <SelectItem key={s} value={s}>{STAGE_BADGE[s]}</SelectItem>
                 ))}
               </SelectContent>
@@ -262,8 +263,8 @@ function DashboardSkeleton() {
   return (
     <div className="max-w-[1400px] mx-auto px-4 sm:px-6 py-6 flex flex-col gap-6">
       <Skeleton className="h-10 w-64" />
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-28 rounded-xl" />)}
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
+        {Array.from({ length: 5 }).map((_, i) => <Skeleton key={i} className="h-28 rounded-xl" />)}
       </div>
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
         <div className="xl:col-span-2 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">

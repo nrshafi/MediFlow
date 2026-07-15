@@ -4,6 +4,9 @@ import type {
   HealthStatus,
 } from "@mediflow/shared";
 import { Hono } from "hono";
+import { cors } from "hono/cors";
+import { createOperationsHandler } from "./routes/operations";
+import { createDoctorBriefHandler } from "./routes/llm";
 import {
   createSimulationHandlers,
   type AppEnvironment,
@@ -18,6 +21,17 @@ import {
 export function createApp(databaseFactory?: DatabaseFactory) {
   const app = new Hono<AppEnvironment>();
   const simulation = createSimulationHandlers(databaseFactory);
+  const operations = createOperationsHandler(databaseFactory);
+  const doctorBrief = createDoctorBriefHandler(databaseFactory);
+
+  app.use(
+    "/api/*",
+    cors({
+      origin: "*",
+      allowMethods: ["GET", "POST", "OPTIONS"],
+      allowHeaders: ["Content-Type"],
+    }),
+  );
 
   app.get("/api/health", (context) => {
     const response: ApiSuccess<HealthStatus> = {
@@ -28,6 +42,8 @@ export function createApp(databaseFactory?: DatabaseFactory) {
 
   app.get("/api/simulation", simulation.getState);
   app.post("/api/simulation/tick", simulation.tick);
+  app.get("/api/operations", operations);
+  app.get("/api/patients/:patientId/brief", doctorBrief);
 
   app.notFound((context) => {
     const response: ApiError = {

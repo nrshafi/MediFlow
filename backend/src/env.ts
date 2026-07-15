@@ -1,4 +1,6 @@
 export interface Bindings {
+  GEMINI_API_KEY?: string;
+  GEMINI_MODEL?: string;
   TURSO_AUTH_TOKEN?: string;
   TURSO_DATABASE_URL?: string;
 }

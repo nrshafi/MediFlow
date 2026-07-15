@@ -82,6 +82,7 @@ export function ComparisonChart({ metrics }: { metrics: Metrics }) {
   const data = [
     { metric: "Avg Wait", Uncoordinated: metrics.baseline.avgWaitMin, MediFlow: metrics.live.avgWaitMin },
     { metric: "Avg Visit", Uncoordinated: metrics.baseline.avgVisitMin, MediFlow: metrics.live.avgVisitMin },
+    { metric: "Avg Queue", Uncoordinated: metrics.baseline.avgQueueDepth, MediFlow: metrics.live.avgQueueDepth },
   ];
   return (
     <Panel className="flex flex-col gap-3">

@@ -1,37 +1,69 @@
 # MediFlow
 
-MediFlow is an AI Hospital Resource Orchestrator that helps hospitals coordinate patient flow across existing resources.
+MediFlow is a deterministic hospital resource orchestrator for a simulated 30-patient day. It routes patients across three doctors, a laboratory, X-ray, and ECG; predicts queues and congestion; explains already-made scheduling decisions with Gemini; prepares pre-consultation record briefs; and compares live performance with a fixed-order FIFO baseline.
+
+The LLM is language-only. Scheduling, priority, doctor balancing, queue ordering, and metrics remain deterministic when Gemini is unavailable.
 
 ## Workspaces
 
-- `frontend/` - React and Vite staff, doctor, and patient views
-- `backend/` - Hono API targeting Cloudflare Workers
-- `shared/` - domain types and API contracts used by both applications
+- `frontend/` — React 19 + Vite staff dashboard, patient guidance, and doctor brief views
+- `backend/` — Hono API and deterministic engine targeting Cloudflare Workers
+- `shared/` — strict TypeScript domain types and API contracts
 
-## Running the code
+## Local setup
 
-Use Node.js 20.19 or newer and install dependencies with `npm ci`.
+Requirements: Node.js 20.19 or newer, npm 11, and a Turso database.
 
-- `npm run dev` starts the frontend development server.
-- `npm run dev:api` starts the local Cloudflare Worker.
-- `npm run check` type-checks every workspace.
-- `npm test` runs workspace tests, including migration and deterministic-seed integration coverage.
-- `npm run build` creates production builds for every workspace.
+1. Install dependencies with `npm ci`.
+2. Copy `backend/.dev.vars.example` to `backend/.dev.vars`.
+3. Set `TURSO_DATABASE_URL` and `TURSO_AUTH_TOKEN` in that file.
+4. Set `GEMINI_API_KEY` to enable Gemini explanations and summaries. Without it, scheduling works unchanged and the UI uses explicit deterministic text fallbacks.
+5. Apply migrations and load the reproducible fixture:
 
-To use Turso locally, copy `backend/.dev.vars.example` to
-`backend/.dev.vars` and provide your database URL and authentication token.
-The local secrets file is ignored by Git.
+   ```powershell
+   npm run db:seed --workspace @mediflow/backend
+   ```
 
-## Database development
+6. In separate terminals, start the Worker and frontend:
 
-- `npm run db:generate --workspace @mediflow/backend` generates a committed SQLite migration from `backend/src/db/schema.ts`. This command does not connect to Turso.
-- `npm run db:seed --workspace @mediflow/backend` applies pending migrations to the configured Turso database, clears existing simulated operational data, and loads the canonical deterministic fixture (6 resources and 30 patients). Use it only when resetting the simulation database is intended.
+   ```powershell
+   npm run dev:api
+   npm run dev
+   ```
 
-Migration and seed execution are development commands. The Cloudflare Worker never runs them during a request.
+Vite proxies `/api` to `http://127.0.0.1:8787`. The frontend opens on `http://127.0.0.1:5173`.
 
-## Simulation API
+## Commands
 
-- `GET /api/simulation` returns the persistent simulation minute, playback settings, seed, and patient counts.
-- `POST /api/simulation/tick` advances exactly one simulated minute and returns the clock, arrival, and service-completion events created by that tick.
+- `npm run check` — strict TypeScript checks for every workspace
+- `npm test` — pure engine, migration/seed, API, Gemini adapter, and complete simulated-day tests
+- `npm run build` — Vite production bundle plus a Wrangler Worker dry run
+- `npm run db:generate --workspace @mediflow/backend` — generate a new committed migration after schema changes
+- `npm run db:seed --workspace @mediflow/backend` — apply pending migrations and intentionally reset the simulation fixture
 
-Each tick is atomic and deterministic. Playback speed is implemented by how frequently the client requests ticks; the API never skips intermediate minutes or starts background work.
+The Worker never runs migrations or seed/reset operations during a request.
+
+## API
+
+- `GET /api/health` — service health
+- `GET /api/simulation` — persistent clock and patient counts
+- `POST /api/simulation/tick` — atomically advance exactly one simulated minute
+- `GET /api/operations` — shared polling snapshot for all three frontend views
+- `GET /api/patients/:patientId/brief` — cached Gemini pre-consultation summary or deterministic fallback
+
+Every tick completes due work, registers arrivals, applies urgent-before-normal queues without preemption, balances interchangeable simulated consultations, starts idle resources, records recommendations and metrics, and persists one ordered audit trail.
+
+## Deployment
+
+Deploy the backend as a Cloudflare Worker and configure these secrets/variables:
+
+- `TURSO_DATABASE_URL`
+- `TURSO_AUTH_TOKEN`
+- `GEMINI_API_KEY`
+- `GEMINI_MODEL` (optional; defaults to `gemini-3.5-flash`)
+
+Build `frontend/` for Cloudflare Pages. If Pages and the Worker do not share an origin, set `VITE_API_BASE_URL` to the deployed Worker origin before building. The MVP API permits cross-origin GET/POST access because it serves simulated data only; introduce real authentication and a restricted origin policy before using any real hospital data.
+
+## Deterministic baseline
+
+The baseline uses the identical fixture and naive FIFO queues with a fixed `lab → X-ray → ECG → consultation` sequence, skipping services a patient does not require. The complete-day acceptance test proves all 30 patients and all required consultations finish and verifies improvement in average wait, visit duration, resource utilization, average queue depth, and peak queue depth.

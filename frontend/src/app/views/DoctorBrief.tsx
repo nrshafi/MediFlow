@@ -1,14 +1,24 @@
 import { useEffect, useMemo, useState } from "react";
+import type { ApiSuccess, DoctorBriefResult } from "@mediflow/shared";
 import { AlertTriangle } from "lucide-react";
 import { useSim, formatSimClock } from "../store/SimContext";
-import { DOCTORS } from "../lib/seed";
 import type { Patient } from "../lib/types";
 import { MicroLabel, MonoTag, Panel, PriorityChip, GuardrailNote } from "../components/primitives";
+import { apiUrl } from "../lib/api";
 
 export function DoctorBrief() {
   const { state } = useSim();
   const { patients, resources } = state;
-  const [doctorId, setDoctorId] = useState(DOCTORS[0].id);
+  const doctors = useMemo(
+    () => resources.filter((resource) => resource.type === "doctor"),
+    [resources],
+  );
+  const [doctorId, setDoctorId] = useState<string | null>(null);
+  useEffect(() => {
+    if ((!doctorId || !doctors.some((doctor) => doctor.id === doctorId)) && doctors[0]) {
+      setDoctorId(doctors[0].id);
+    }
+  }, [doctorId, doctors]);
 
   // Queue for the selected doctor: currently-served + queued + those routed to consultation with this doctor
   const queue = useMemo(() => {
@@ -26,6 +36,29 @@ export function DoctorBrief() {
   }, [queue, selectedId]);
 
   const patient = queue.find((p) => p.id === selectedId) ?? queue[0] ?? null;
+  const [brief, setBrief] = useState<DoctorBriefResult | null>(null);
+  useEffect(() => {
+    if (!patient) {
+      setBrief(null);
+      return undefined;
+    }
+    const controller = new AbortController();
+    setBrief(null);
+    void fetch(apiUrl(`/api/patients/${encodeURIComponent(patient.id)}/brief`), {
+      signal: controller.signal,
+      headers: { Accept: "application/json" },
+    })
+      .then(async (response) => {
+        if (!response.ok) throw new Error("Brief request failed");
+        const body = (await response.json()) as ApiSuccess<DoctorBriefResult>;
+        setBrief(body.data);
+      })
+      .catch((error: unknown) => {
+        if (error instanceof DOMException && error.name === "AbortError") return;
+        setBrief(null);
+      });
+    return () => controller.abort();
+  }, [patient?.id]);
 
   return (
     <div className="max-w-[1300px] mx-auto px-4 sm:px-6 py-6">
@@ -37,7 +70,7 @@ export function DoctorBrief() {
         {/* Sidebar */}
         <aside className="flex flex-col gap-4">
           <div className="flex flex-col gap-2">
-            {DOCTORS.map((d) => {
+            {doctors.map((d) => {
               const isActive = d.id === doctorId;
               return (
                 <button
@@ -94,7 +127,7 @@ export function DoctorBrief() {
         </aside>
 
         {/* Main brief */}
-        {patient ? <Brief patient={patient} minute={state.minute} /> : (
+        {patient ? <Brief patient={patient} minute={state.minute} brief={brief} /> : (
           <Panel className="flex items-center justify-center" style={{ minHeight: 300 }}>
             <span style={{ color: "var(--text-muted)" }}>Select a patient to view their brief.</span>
           </Panel>
@@ -104,7 +137,7 @@ export function DoctorBrief() {
   );
 }
 
-function Brief({ patient, minute }: { patient: Patient; minute: number }) {
+function Brief({ patient, minute, brief }: { patient: Patient; minute: number; brief: DoctorBriefResult | null }) {
   const h = patient.history;
   return (
     <section className="flex flex-col gap-4">
@@ -121,10 +154,19 @@ function Brief({ patient, minute }: { patient: Patient; minute: number }) {
             </div>
           </div>
           <div className="flex flex-col items-end gap-1">
-            <MonoTag className="!text-[color:var(--accent-primary)] !border-[color:var(--accent-primary)]">AI-GENERATED BRIEF</MonoTag>
+            <MonoTag className="!text-[color:var(--accent-primary)] !border-[color:var(--accent-primary)]">
+              {brief?.generatedBy === "gemini" ? "GEMINI BRIEF" : "RECORD BRIEF"}
+            </MonoTag>
             <span className="font-mono uppercase" style={{ fontSize: "10px", color: "var(--text-muted)" }}>GENERATED {formatSimClock(minute)}</span>
           </div>
         </div>
+      </Panel>
+
+      <Panel className="flex flex-col gap-3">
+        <MicroLabel>PRE-CONSULTATION SUMMARY</MicroLabel>
+        <p style={{ fontSize: "14px", lineHeight: 1.7, color: "var(--text-primary)" }}>
+          {brief?.content ?? "Preparing the patient record summary…"}
+        </p>
       </Panel>
 
       {/* Allergies — full width, error tint */}

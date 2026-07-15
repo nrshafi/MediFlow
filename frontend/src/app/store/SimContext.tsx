@@ -1,223 +1,187 @@
+import type { ApiSuccess, OperationsSnapshot, SimState } from "@mediflow/shared";
 import {
   createContext,
   useCallback,
   useContext,
   useEffect,
   useMemo,
-  useReducer,
+  useRef,
   useState,
 } from "react";
 import type { ReactNode } from "react";
-import type { SimState } from "../lib/types";
-import { initState, tick } from "../lib/engine";
+import { apiUrl } from "../lib/api";
 
 interface SimContextValue {
   state: SimState;
+  error: string | null;
   play: () => void;
   pause: () => void;
-  stepPrevious: () => void;
-  stepNext: () => void;
-  canStepPrevious: boolean;
+  stepNext: () => Promise<void>;
   toggleSpeed: () => void;
-  reset: () => void;
+  refresh: () => Promise<void>;
 }
 
 const SimContext = createContext<SimContextValue | null>(null);
+const REAL_MS_PER_TICK = 3000;
+const POLL_INTERVAL_MS = 5000;
 
-const REAL_MS_PER_TICK = 3000; // 3 real seconds = +1 sim minute at 1×
+const EMPTY_STATE: SimState = {
+  minute: 0,
+  playing: false,
+  speed: 1,
+  patients: [],
+  resources: [],
+  recommendations: {},
+  alerts: [],
+  metrics: {
+    live: {
+      avgWaitMin: 0,
+      avgVisitMin: 0,
+      utilizationPct: 0,
+      avgQueueDepth: 0,
+      peakQueueDepth: 0,
+      patientsInHouse: 0,
+      completed: 0,
+    },
+    baseline: {
+      avgWaitMin: 0,
+      avgVisitMin: 0,
+      utilizationPct: 0,
+      avgQueueDepth: 0,
+      peakQueueDepth: 0,
+      patientsInHouse: 0,
+      completed: 0,
+    },
+  },
+  loading: true,
+};
 
-interface SimControllerState {
-  present: SimState;
-  past: SimState[];
-}
-
-type SimAction =
-  | { type: "finish-loading" }
-  | { type: "auto-step" }
-  | { type: "step-next" }
-  | { type: "step-previous" }
-  | { type: "play" }
-  | { type: "pause" }
-  | { type: "toggle-speed" }
-  | { type: "reset" };
-
-function advance(
-  controller: SimControllerState,
-  steps: number,
-  playing: boolean,
-): SimControllerState {
-  const past = [...controller.past];
-  let present = { ...controller.present, playing, loading: false };
-
-  for (let i = 0; i < steps; i += 1) {
-    past.push(present);
-    present = tick(present);
+async function readJson<T>(response: Response): Promise<T> {
+  const body = (await response.json()) as
+    | ApiSuccess<T>
+    | { error?: { message?: string } };
+  if (!response.ok || !("data" in body)) {
+    throw new Error(
+      "error" in body && body.error?.message
+        ? body.error.message
+        : `Request failed with status ${response.status}`,
+    );
   }
-
-  return { present: { ...present, playing }, past };
-}
-
-function simReducer(
-  controller: SimControllerState,
-  action: SimAction,
-): SimControllerState {
-  switch (action.type) {
-    case "finish-loading":
-      return controller.present.loading
-        ? advance(controller, 1, controller.present.playing)
-        : controller;
-    case "auto-step":
-      return controller.present.playing
-        ? advance(controller, controller.present.speed, true)
-        : controller;
-    case "step-next":
-      return advance(controller, 1, false);
-    case "step-previous": {
-      const previous = controller.past.at(-1);
-      if (!previous) {
-        return {
-          ...controller,
-          present: { ...controller.present, playing: false },
-        };
-      }
-      return {
-        present: {
-          ...previous,
-          playing: false,
-          speed: controller.present.speed,
-          loading: false,
-        },
-        past: controller.past.slice(0, -1),
-      };
-    }
-    case "play":
-      return {
-        ...controller,
-        present: { ...controller.present, playing: true },
-      };
-    case "pause":
-      return {
-        ...controller,
-        present: { ...controller.present, playing: false },
-      };
-    case "toggle-speed":
-      return {
-        ...controller,
-        present: {
-          ...controller.present,
-          speed: controller.present.speed === 1 ? 4 : 1,
-        },
-      };
-    case "reset":
-      return { present: initState(), past: [] };
-  }
+  return body.data;
 }
 
 export function SimProvider({ children }: { children: ReactNode }) {
-  const [controller, dispatch] = useReducer(simReducer, undefined, () => ({
-    present: initState(),
-    past: [],
-  }));
-  const state = controller.present;
+  const [snapshot, setSnapshot] = useState<OperationsSnapshot | null>(null);
+  const [playing, setPlaying] = useState(false);
+  const [speed, setSpeed] = useState<1 | 4>(1);
+  const [error, setError] = useState<string | null>(null);
+  const tickInFlight = useRef(false);
 
-  // Initial "poll" skeleton, then first data.
-  useEffect(() => {
-    const timeout = setTimeout(() => {
-      dispatch({ type: "finish-loading" });
-    }, 600);
-    return () => clearTimeout(timeout);
+  const refresh = useCallback(async () => {
+    try {
+      const response = await fetch(apiUrl("/api/operations"), {
+        headers: { Accept: "application/json" },
+      });
+      const data = await readJson<OperationsSnapshot>(response);
+      setSnapshot(data);
+      if (
+        data.simulation.totalPatients > 0 &&
+        data.simulation.completedPatients === data.simulation.totalPatients
+      ) {
+        setPlaying(false);
+      }
+      setError(null);
+    } catch (requestError) {
+      setError(
+        requestError instanceof Error
+          ? requestError.message
+          : "Unable to load live hospital state",
+      );
+    }
   }, []);
 
-  // Automatic tick loop. The reducer reads the latest speed and play state.
-  useEffect(() => {
-    const interval = setInterval(() => {
-      dispatch({ type: "auto-step" });
-    }, REAL_MS_PER_TICK);
-    return () => clearInterval(interval);
-  }, []);
+  const stepNext = useCallback(async () => {
+    if (tickInFlight.current) return;
+    tickInFlight.current = true;
+    try {
+      const response = await fetch(apiUrl("/api/simulation/tick"), {
+        method: "POST",
+        headers: { Accept: "application/json" },
+      });
+      await readJson(response);
+      await refresh();
+    } catch (requestError) {
+      setPlaying(false);
+      setError(
+        requestError instanceof Error
+          ? requestError.message
+          : "Unable to advance the simulation",
+      );
+    } finally {
+      tickInFlight.current = false;
+    }
+  }, [refresh]);
 
-  const play = useCallback(() => dispatch({ type: "play" }), []);
-  const pause = useCallback(() => dispatch({ type: "pause" }), []);
-  const stepPrevious = useCallback(
-    () => dispatch({ type: "step-previous" }),
-    [],
-  );
-  const stepNext = useCallback(() => dispatch({ type: "step-next" }), []);
+  useEffect(() => {
+    void refresh();
+    const interval = window.setInterval(() => void refresh(), POLL_INTERVAL_MS);
+    return () => window.clearInterval(interval);
+  }, [refresh]);
+
+  useEffect(() => {
+    if (!playing) return undefined;
+    const interval = window.setInterval(
+      () => void stepNext(),
+      REAL_MS_PER_TICK / speed,
+    );
+    return () => window.clearInterval(interval);
+  }, [playing, speed, stepNext]);
+
+  const play = useCallback(() => setPlaying(true), []);
+  const pause = useCallback(() => setPlaying(false), []);
   const toggleSpeed = useCallback(
-    () => dispatch({ type: "toggle-speed" }),
+    () => setSpeed((current) => (current === 1 ? 4 : 1)),
     [],
   );
-  const reset = useCallback(() => dispatch({ type: "reset" }), []);
+
+  const state = useMemo<SimState>(() => {
+    if (!snapshot) return { ...EMPTY_STATE, playing, speed };
+    return {
+      minute: snapshot.simulation.minute,
+      playing,
+      speed,
+      patients: snapshot.patients,
+      resources: snapshot.resources,
+      recommendations: snapshot.recommendations,
+      alerts: snapshot.alerts,
+      metrics: snapshot.metrics,
+      loading: false,
+    };
+  }, [playing, snapshot, speed]);
 
   const value = useMemo(
-    () => ({
-      state,
-      play,
-      pause,
-      stepPrevious,
-      stepNext,
-      canStepPrevious: controller.past.length > 0,
-      toggleSpeed,
-      reset,
-    }),
-    [
-      state,
-      controller.past.length,
-      play,
-      pause,
-      stepPrevious,
-      stepNext,
-      toggleSpeed,
-      reset,
-    ],
+    () => ({ state, error, play, pause, stepNext, toggleSpeed, refresh }),
+    [error, pause, play, refresh, state, stepNext, toggleSpeed],
   );
 
   return <SimContext.Provider value={value}>{children}</SimContext.Provider>;
 }
 
 export function useSim(): SimContextValue {
-  const ctx = useContext(SimContext);
-  if (!ctx) throw new Error("useSim must be used within SimProvider");
-  return ctx;
+  const context = useContext(SimContext);
+  if (!context) throw new Error("useSim must be used within SimProvider");
+  return context;
 }
 
-// Role (STAFF / DOCTOR / PATIENT) persisted to localStorage
-export type Role = "staff" | "doctor" | "patient";
-const ROLE_KEY = "mediflow.role";
-
-export function usePersistedRole(): [Role, (r: Role) => void] {
-  const [role, setRole] = useState<Role>(() => {
-    if (typeof window === "undefined") return "staff";
-    const stored = window.localStorage.getItem(ROLE_KEY);
-    return stored === "doctor" || stored === "patient" ? stored : "staff";
-  });
-  const update = useCallback((r: Role) => {
-    setRole(r);
-    try {
-      window.localStorage.setItem(ROLE_KEY, r);
-    } catch {
-      /* ignore */
-    }
-  }, []);
-  return [role, update];
-}
-
-// Sim clock formatting
 export function formatSimClock(minute: number): string {
-  const total = 9 * 60 + minute; // start 09:00
-  const h24 = Math.floor(total / 60) % 24;
-  const m = total % 60;
-  const ampm = h24 >= 12 ? "PM" : "AM";
-  const h12 = h24 % 12 === 0 ? 12 : h24 % 12;
-  return `${h12}:${String(m).padStart(2, "0")} ${ampm}`;
+  const total = 9 * 60 + minute;
+  const hour24 = Math.floor(total / 60) % 24;
+  const minutes = total % 60;
+  const period = hour24 >= 12 ? "PM" : "AM";
+  const hour12 = hour24 % 12 === 0 ? 12 : hour24 % 12;
+  return `${hour12}:${String(minutes).padStart(2, "0")} ${period}`;
 }
 
 export function formatSimTime(minute: number): string {
-  const total = 9 * 60 + minute;
-  const h24 = Math.floor(total / 60) % 24;
-  const m = total % 60;
-  const s = Math.floor((Date.now() / 1000) % 60);
-  const ampm = h24 >= 12 ? "PM" : "AM";
-  const h12 = h24 % 12 === 0 ? 12 : h24 % 12;
-  return `${h12}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")} ${ampm}`;
+  return formatSimClock(minute);
 }

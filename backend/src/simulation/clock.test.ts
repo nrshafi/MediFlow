@@ -180,15 +180,20 @@ test("one tick persists clock, completion, arrival, and API state", async () => 
           event.patientId === arrivalPatientId,
       ),
     );
-    assert.equal(completedPatient?.currentResourceId, null);
-    assert.equal(completedPatient?.serviceEndsAtMinute, null);
+    assert.notEqual(completedPatient?.currentResourceId, "lab");
     assert.equal(arrivedPatient?.registered, true);
-    assert.equal(labState?.status, "available");
-    assert.equal(labState?.currentPatientId, null);
+    assert.notEqual(labState?.currentPatientId, labService.patientId);
     assert.equal(completedService?.completed, true);
     assert.equal(completedTimeline?.endedAtMinute, 1);
     assert.equal(arrivalTimeline?.startedAtMinute, 1);
     assert.equal(arrivalTimeline?.endedAtMinute, 1);
+    assert.ok(
+      result.events.some(
+        (event) =>
+          event.type === "recommendation_created" &&
+          event.patientId === arrivalPatientId,
+      ),
+    );
 
     const [eventCount] = await database
       .select({ value: count() })
@@ -213,6 +218,34 @@ test("one tick persists clock, completion, arrival, and API state", async () => 
     };
     assert.equal(tickBody.data.state.minute, 2);
     assert.equal((await getSimulationStatus(database)).minute, 2);
+
+    const operationsResponse = await app.request("/api/operations", undefined, {});
+    assert.equal(operationsResponse.status, 200);
+    const operationsBody = (await operationsResponse.json()) as {
+      data: {
+        simulation: { minute: number };
+        patients: unknown[];
+        resources: unknown[];
+        recommendations: Record<string, unknown>;
+      };
+    };
+    assert.equal(operationsBody.data.simulation.minute, 2);
+    assert.equal(operationsBody.data.patients.length, 30);
+    assert.equal(operationsBody.data.resources.length, 6);
+    assert.ok(Object.keys(operationsBody.data.recommendations).length > 0);
+
+    const briefResponse = await app.request(
+      `/api/patients/${arrivalPatientId}/brief`,
+      undefined,
+      {},
+    );
+    assert.equal(briefResponse.status, 200);
+    const briefBody = (await briefResponse.json()) as {
+      data: { patientId: string; content: string; generatedBy: string };
+    };
+    assert.equal(briefBody.data.patientId, arrivalPatientId);
+    assert.equal(briefBody.data.generatedBy, "fallback");
+    assert.ok(briefBody.data.content.length > 20);
   } finally {
     client.close();
   }

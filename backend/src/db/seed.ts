@@ -7,6 +7,7 @@ import type {
 } from "@mediflow/shared";
 import type { BatchItem } from "drizzle-orm/batch";
 import type { Database } from "./client";
+import { computeNaiveFifoBaseline } from "../engine/baseline";
 import {
   allergies,
   diagnoses,
@@ -409,6 +410,24 @@ export async function resetAndSeedDatabase(
   seed = CANONICAL_SEED,
 ): Promise<SeedData> {
   const data = buildSeedData(seed);
+  const baseline = computeNaiveFifoBaseline({
+    patients: data.patients.map((patient) => ({
+      id: patient.id,
+      arrivalMinute: patient.arrivalMinute,
+      estimatedConsultationDuration: patient.estimatedConsultationDuration,
+    })),
+    services: data.requiredServices.map((service) => ({
+      patientId: service.patientId,
+      position: service.position,
+      kind: service.kind,
+      doctorId: service.doctorId ?? null,
+    })),
+    resources: data.resources.map((resource) => ({
+      id: resource.id,
+      type: resource.type,
+      serviceDurationMin: resource.serviceDurationMin ?? null,
+    })),
+  });
   const statements: [BatchItem<"sqlite">, ...BatchItem<"sqlite">[]] = [
     database.delete(llmOutputs),
     database.delete(metricSnapshots),
@@ -443,6 +462,11 @@ export async function resetAndSeedDatabase(
   }
   statements.push(
     database.insert(simulationState).values({ id: "current", seed }),
+    database.insert(metricSnapshots).values({
+      simulationMinute: 0,
+      kind: "baseline",
+      ...baseline,
+    }),
     database.insert(simulationEvents).values({
       id: "event-0001",
       simulationMinute: 0,

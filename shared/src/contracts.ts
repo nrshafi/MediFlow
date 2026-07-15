@@ -1,4 +1,11 @@
-import type { SimulationEventType } from "./domain";
+import type {
+  BottleneckAlert,
+  Metrics,
+  Patient,
+  Recommendation,
+  Resource,
+  SimulationEventType,
+} from "./domain";
 
 export interface ApiSuccess<T> {
   data: T;
@@ -40,4 +47,19 @@ export interface SimulationTickEvent {
 export interface SimulationTickResult {
   state: SimulationStatus;
   events: SimulationTickEvent[];
+}
+
+export interface OperationsSnapshot {
+  simulation: SimulationStatus;
+  patients: Patient[];
+  resources: Resource[];
+  recommendations: Record<string, Recommendation>;
+  alerts: BottleneckAlert[];
+  metrics: Metrics;
+}
+
+export interface DoctorBriefResult {
+  patientId: string;
+  content: string;
+  generatedBy: "gemini" | "fallback";
 }

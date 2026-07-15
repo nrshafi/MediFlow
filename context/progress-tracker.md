@@ -4,13 +4,23 @@ Update this file after every meaningful implementation change.
 
 ## Current Phase
 
-- Phase 3 complete — persistent one-minute simulation clock and arrival/completion events verified
+- Phase 6 complete — MVP implementation and acceptance verification finished
 
 ## Current Goal
 
-- Resolve priority semantics, then build deterministic scheduling engine v1
+- MVP complete; remaining work is environment configuration and deployment
 
 ## Completed
+
+- 2026-07-15 - Completed deterministic before/after metrics with a fixed-order FIFO baseline and per-tick live snapshots for wait, visit duration, utilization, average queue depth, and peak queue depth; added a second committed migration without modifying the applied initial migration
+
+- 2026-07-15 - Added the provider-agnostic Gemini language adapter with current `generateContent` REST integration, timeouts, source-hash caching, deterministic graceful fallbacks, recommendation explanations generated at the tick edge, and on-demand pre-consultation record summaries
+
+- 2026-07-15 - Completed full-day acceptance coverage: all 30 patients and every required service finish, consultation load is balanced across interchangeable simulated doctors, all five impact measures improve against baseline, cached Gemini output is returned through polling, all 15 tests pass, all workspaces build, and the production frontend returns HTTP 200
+
+- 2026-07-15 - Implemented deterministic scheduling engine v1 with earliest-projected-completion routing, binary non-preemptive priority queues, FIFO and stable tie-breakers, automatic service starts/rerouting/completion, wait/service/utilization accumulation, queue predictions, congestion alerts, recommendation events, and pure plus persistent integration tests
+
+- 2026-07-15 - Added the shared `GET /api/operations` snapshot for resources, queues, patients, histories, recommendations, alerts, and live metrics; replaced the browser-only simulator with one API polling layer and persistent tick controls across the staff, patient, and doctor views; removed pharmacy/billing from the MVP flow UI
 
 - 2026-07-15 - Added the persistent deterministic simulation clock, pure one-minute tick planning, atomic arrival/service-completion transitions, ordered audit events with concurrent-tick protection, and `GET /api/simulation` plus `POST /api/simulation/tick`; verified state transitions and HTTP responses through the generated migration with six passing backend tests
 
@@ -35,23 +45,24 @@ Update this file after every meaningful implementation change.
 
 ## In Progress
 
-- None yet.
+- None.
 
 ## Next Up
 
-1. Resolve priority-level scheduling semantics
-2. Deterministic scheduling engine v1 — next-step recommendation per patient
-3. Live Resource Dashboard v1 — resource status, queues, wait estimates (polling)
-4. Queue prediction + bottleneck detection
-5. LLM explanation layer, then pre-consultation summaries (Gemini)
-6. Before/after impact metrics vs. uncoordinated baseline
+1. Configure Turso and Gemini credentials for the target environment
+2. Apply migrations/seed, deploy the Worker, and deploy the Pages frontend
+3. Revisit authentication and restricted CORS before any real-data integration
 
 ## Open Questions
 
-- **Priority levels** — patients have a "priority level", but its semantics (how many levels, how they weight scheduling order) are unspecified. Needs a product decision before engine v1
-- **Baseline definition** — what "before" means for before/after metrics. Default: the same patient set run through naive FIFO with no orchestration
+- None for the simulated-data MVP.
 
 ## Architecture Decisions
+
+- **Binary non-preemptive priority semantics** — urgent patients precede normal patients in each resource queue; equal-priority patients use FIFO with patient ID as the final deterministic tie-breaker. Active services are never interrupted *(decided 2026-07-15)*
+- **Fixed-order FIFO baseline** — the identical fixture uses lab → X-ray → ECG → consultation, skips unneeded services, and applies naive FIFO without priority or reordering *(implemented 2026-07-15)*
+- **Interchangeable simulated consultations** — engine v1 may balance consultation work across the three demo doctors because no clinical suitability requirements exist in simulated data; this must be revisited before real integration *(implemented 2026-07-15)*
+- **Gemini language adapter with deterministic fallback** — Gemini rewrites scheduling facts and summarizes records only; timeouts or missing credentials never change engine behavior *(implemented 2026-07-15)*
 
 - **npm-workspace monorepo** with `frontend/`, `backend/`, and `shared/` boundaries; the existing React prototype is preserved in the frontend workspace *(implemented 2026-07-15)*
 - **Drizzle ORM over the libSQL client for Turso access**; database construction stays in `backend/src/db/` and credentials remain Worker bindings *(implemented 2026-07-15)*
@@ -67,6 +78,10 @@ Update this file after every meaningful implementation change.
 - **Tailwind CSS + shadcn/ui** as the component layer *(decided 2026-07-14)*
 
 ## Session Notes
+
+- 2026-07-15: MVP completion audit passed. The complete-day test verifies 30/30 patient completion, all consultations and required services completed, and improvement over baseline in average wait, visit duration, utilization, average queue depth, and peak queue depth. The suite has 15 passing tests; strict checks and all production builds pass; the built frontend smoke test returns HTTP 200.
+
+- 2026-07-15: Scheduling and live-data integration completed. The browser now renders persisted Worker/Turso state through a single polling context; it no longer computes recommendations or advances a separate in-memory simulation. `npm run check`, all nine backend tests, and all workspace production builds pass.
 
 - 2026-07-15: Completed the simulation clock/event phase. A tick advances one minute and atomically updates clock, arrival registration/timeline state, active service/resource completion state, required-service completion, and ordered events. The read/tick endpoints are covered through the Hono app with an injected in-memory libSQL database. All workspace checks, six tests, and production builds pass.
 

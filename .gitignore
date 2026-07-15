@@ -6,4 +6,6 @@ backend/.dev.vars*
 backend/.env*
 !backend/.env.example
 backend/.seed-test.db*
+frontend/.env*
+!frontend/.env.example
 *.log

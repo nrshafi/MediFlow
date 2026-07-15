@@ -3,6 +3,7 @@ import { BrowserRouter, Navigate, Route, Routes } from "react-router";
 import { SimProvider } from "./store/SimContext";
 import { TopBar } from "./components/Shell";
 import { DataFooter } from "./components/primitives";
+import { useSim } from "./store/SimContext";
 
 const StaffDashboard = lazy(async () => {
   const module = await import("./views/StaffDashboard");
@@ -27,12 +28,38 @@ function ViewFallback() {
   );
 }
 
+function ApiStatus() {
+  const { error, refresh } = useSim();
+  if (!error) return null;
+  return (
+    <div
+      className="flex items-center justify-center gap-3 px-4 py-2 text-sm"
+      role="alert"
+      style={{
+        backgroundColor: "color-mix(in srgb, var(--state-error) 12%, var(--bg-base))",
+        borderBottom: "1px solid var(--state-error)",
+        color: "var(--text-primary)",
+      }}
+    >
+      <span>Live API unavailable: {error}</span>
+      <button
+        className="font-mono uppercase underline underline-offset-4"
+        style={{ color: "var(--accent-primary)", fontSize: "11px" }}
+        onClick={() => void refresh()}
+      >
+        Retry
+      </button>
+    </div>
+  );
+}
+
 export default function App() {
   return (
     <SimProvider>
       <BrowserRouter>
         <div className="min-h-screen flex flex-col" style={{ backgroundColor: "var(--bg-base)" }}>
           <TopBar />
+          <ApiStatus />
           <main className="flex-1">
             <Suspense fallback={<ViewFallback />}>
               <Routes>

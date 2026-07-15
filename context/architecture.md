@@ -38,8 +38,21 @@ The npm-workspace monorepo layout was implemented on 2026-07-15.
 - `POST /api/simulation/tick` advances the persistent clock by exactly one simulated minute. Playback speed remains a client concern: 4× playback issues ticks more frequently rather than skipping intermediate minutes.
 - Each tick is planned deterministically from the current persisted state and applied as one atomic libSQL batch. A unique `clock_advanced` event for the target minute provides optimistic concurrency protection, so concurrent requests cannot advance the same minute twice.
 - Within a minute, the clock event is recorded first, due active services are completed in patient-ID order, and newly due arrivals are registered in patient-ID order. Event rows carry an explicit order within their simulation minute.
-- Completing a service clears the patient/resource active-service state, closes the open timeline entry, and marks the matching required service complete. It does **not** choose or queue the next service; that remains the deterministic scheduling engine's responsibility in the following feature unit.
+- Completing a service clears the patient/resource active-service state, closes the open timeline entry, and marks the matching required service complete. After completions and arrivals are applied in memory, the deterministic scheduler queues next steps and starts idle resources within the same atomic tick batch.
 - `GET /api/simulation` returns the persisted clock plus patient counts. No request handler owns a timer or performs background work.
+
+## Scheduling Semantics
+
+- Priority is binary for the MVP: `urgent` patients precede `normal` patients in every waiting queue. Patients at the same priority remain FIFO by queue-entry minute, with patient ID as the deterministic final tie-breaker.
+- Priority never preempts a service already in progress. It only affects waiting-queue order.
+- For an idle patient with multiple incomplete required services, the engine chooses the next resource that minimizes projected whole-visit completion (work ahead at the candidate resource + all of the patient's remaining service time). Required-service position and resource ID provide deterministic tie-breakers.
+- A patient may wait in at most one resource queue and may receive at most one active service at a time. Once all required services are complete, the visit is marked done; pharmacy and billing remain outside the MVP.
+- MVP consultation requests are operationally interchangeable across the three simulated doctors; the scheduler deterministically selects the doctor with the best projected visit completion and persists that assignment. No specialty or clinical suitability decision is inferred.
+
+## Impact Baseline
+
+- The uncoordinated baseline uses the identical patient/resource fixture but sends every patient through a fixed `lab → X-ray → ECG → consultation` order (skipping services they do not require), with naive FIFO at every resource and no priority handling or service reordering.
+- Baseline results are computed deterministically during simulation reset and stored as a baseline metric snapshot. MediFlow live metrics are stored after every atomic tick for direct before/after comparison, including rolling average and peak hospital-wide queue depth.
 
 ## Auth and Access Model
 

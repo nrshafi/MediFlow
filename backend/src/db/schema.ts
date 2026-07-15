@@ -369,6 +369,8 @@ export const metricSnapshots = sqliteTable(
     avgWaitMin: integer("avg_wait_min").notNull(),
     avgVisitMin: integer("avg_visit_min").notNull(),
     utilizationPct: integer("utilization_pct").notNull(),
+    avgQueueDepth: integer("avg_queue_depth").notNull().default(0),
+    peakQueueDepth: integer("peak_queue_depth").notNull().default(0),
     patientsInHouse: integer("patients_in_house").notNull(),
     completed: integer("completed").notNull(),
     createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
@@ -388,6 +390,14 @@ export const metricSnapshots = sqliteTable(
     check(
       "metric_snapshots_utilization_valid",
       sql`${table.utilizationPct} between 0 and 100`,
+    ),
+    check(
+      "metric_snapshots_avg_queue_depth_nonnegative",
+      nonnegative(table.avgQueueDepth),
+    ),
+    check(
+      "metric_snapshots_peak_queue_depth_nonnegative",
+      nonnegative(table.peakQueueDepth),
     ),
     check(
       "metric_snapshots_patients_in_house_nonnegative",

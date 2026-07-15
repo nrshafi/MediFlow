@@ -1,8 +1,6 @@
 import { Check } from "lucide-react";
 import type { Patient, Stage } from "../lib/types";
 
-const STAGE_ORDER: Stage[] = ["registration", "lab", "xray", "ecg", "consultation", "pharmacy", "billing"];
-
 const STAGE_LABEL: Record<Stage, string> = {
   registration: "Registration",
   lab: "Blood Test",
@@ -17,11 +15,15 @@ const STAGE_LABEL: Record<Stage, string> = {
 type StepState = "done" | "current" | "upcoming";
 
 function buildSteps(patient: Patient): Array<{ stage: Stage; label: string; state: StepState }> {
-  const requiredKinds = new Set(patient.requiredServices.map((s) => s.kind));
-  const stages: Stage[] = STAGE_ORDER.filter((s) => {
-    if (s === "registration" || s === "consultation" || s === "pharmacy" || s === "billing") return true;
-    return requiredKinds.has(s as never);
-  });
+  const stages: Stage[] = ["registration"];
+  const append = (stage: Stage) => {
+    if (stage !== "done" && !stages.includes(stage)) stages.push(stage);
+  };
+  patient.timeline.forEach((entry) => append(entry.stage));
+  append(patient.currentStage);
+  patient.requiredServices
+    .filter((service) => !service.done)
+    .forEach((service) => append(service.kind));
   return stages.map((stage) => {
     const tl = patient.timeline.find((t) => t.stage === stage);
     let state: StepState = "upcoming";

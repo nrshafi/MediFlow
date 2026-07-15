@@ -3,3 +3,7 @@
 
 TURSO_DATABASE_URL="libsql://your-database-name-your-org.turso.io"
 TURSO_AUTH_TOKEN="your-turso-auth-token"
+
+# Optional until the language layer is exercised. Scheduling never depends on it.
+GEMINI_API_KEY="your-gemini-api-key"
+GEMINI_MODEL="gemini-3.5-flash"

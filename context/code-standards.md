@@ -44,7 +44,7 @@
 
 - All persistent state belongs in Turso (SQLite) — resources, patients, queue state, events, metric snapshots
 - Simulated data only: seed scripts generate patients and histories; no real records, ever
-- Cache LLM outputs (explanations, summaries) per patient/step instead of regenerating on every read *(proposed)*
+- Cache LLM outputs (explanations, summaries) by patient, kind, and deterministic source hash instead of regenerating on polling reads
 - No secrets in the database, code, or repo — environment variables only
 
 ## File Organization

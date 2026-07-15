@@ -128,10 +128,17 @@ function BigStat({ label, value }: { label: string; value: number }) {
   );
 }
 
-function estimateRemaining(patient: { requiredServices: { done: boolean; kind: string }[]; estimatedConsultationDuration: number; serviceEndsAt: number | null }, minute: number): number {
+function estimateRemaining(patient: { requiredServices: { done: boolean; kind: string }[]; estimatedConsultationDuration: number; serviceEndsAt: number | null; currentResourceId: string | null; currentStage: string }, minute: number): number {
   const remaining = patient.requiredServices.filter((s) => !s.done);
   const durMap: Record<string, number> = { lab: 8, xray: 9, ecg: 6, consultation: patient.estimatedConsultationDuration };
-  const svcTime = remaining.reduce((s, r) => s + (durMap[r.kind] ?? 5), 0);
+  const svcTime = remaining.reduce(
+    (sum, service) =>
+      sum +
+      (patient.currentResourceId && service.kind === patient.currentStage
+        ? 0
+        : (durMap[service.kind] ?? 5)),
+    0,
+  );
   const currentRemain = patient.serviceEndsAt != null ? Math.max(0, patient.serviceEndsAt - minute) : 0;
-  return svcTime + 7 /* pharmacy + billing */ + currentRemain;
+  return svcTime + currentRemain;
 }

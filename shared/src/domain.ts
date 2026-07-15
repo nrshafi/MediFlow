@@ -154,6 +154,8 @@ export interface MetricsBlock {
   avgWaitMin: number;
   avgVisitMin: number;
   utilizationPct: number;
+  avgQueueDepth: number;
+  peakQueueDepth: number;
   patientsInHouse: number;
   completed: number;
 }
