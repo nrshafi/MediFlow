@@ -4,13 +4,15 @@ Update this file after every meaningful implementation change.
 
 ## Current Phase
 
-- Phase 8 complete — Gemini brief presentation hardening
+- Phase 9 complete — judge-facing walkthrough rehearsal
 
 ## Current Goal
 
-- Live Gemini and fallback pre-consultation summaries render as readable, safety-preserving clinical sections
+- The production reset-to-impact walkthrough is rehearsed, captured, and ready for judges
 
 ## Completed
+
+- 2026-07-15 - Rehearsed the judge-facing walkthrough end to end against production, captured the reset, live Staff, Patient, Doctor, and final-impact states, documented a four-minute talk track and recovery cues, verified 30/30 completion at minute 240, and restored the shared demo to minute zero
 
 - 2026-07-15 - Deployed the formatted Doctor Brief UI and Worker prompt/cache update; production Gemini smoke testing returned six labeled lines with no Markdown markers, and the live Pages Doctor Brief chunk contains the safe section formatter
 
@@ -57,9 +59,8 @@ Update this file after every meaningful implementation change.
 
 ## Next Up
 
-1. Rehearse and record the judge-facing walkthrough from reset through final impact metrics
-2. Add production monitoring/alert review and restrict CORS plus public mutation access before broader sharing
-3. Revisit authentication before any real-data integration
+1. Add production monitoring/alert review and restrict CORS plus public mutation access before broader sharing
+2. Revisit authentication before any real-data integration
 
 ## Open Questions
 
@@ -86,6 +87,8 @@ Update this file after every meaningful implementation change.
 - **Tailwind CSS + shadcn/ui** as the component layer *(decided 2026-07-14)*
 
 ## Session Notes
+
+- 2026-07-15: Production judge rehearsal completed from protected reset through all 30 patients at minute 240. MediFlow versus uncoordinated baseline: average wait 2 vs 10 minutes, visit duration 25 vs 32 minutes, utilization 46.5% vs 45%, average queue depth 0.3 vs 1.2, and peak queue depth 2 vs 5. The presenter script is in `docs/judge-walkthrough.md`, with five production captures in `artifacts/judge-walkthrough/`; the shared demo was returned to minute zero after capture.
 
 - 2026-07-15: Gemini brief formatting deployed. Worker version `75f95ada-4442-4b0b-87d0-c60db31ca223` requests a six-line plain-text clinical summary and uses cache format version 2; the production Pages formatter also handles previously cached bold Markdown safely. Live patient `P-007` returned a Gemini brief with six expected categories and no raw Markdown syntax.
 
