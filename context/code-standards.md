@@ -45,7 +45,7 @@
 - All persistent state belongs in Turso (SQLite) — resources, patients, queue state, events, metric snapshots
 - Simulated data only: seed scripts generate patients and histories; no real records, ever
 - Cache LLM outputs (explanations, summaries) by patient, kind, and deterministic source hash instead of regenerating on polling reads
-- No secrets in the database, code, or repo — environment variables only
+- No secrets in the database, code, or repo. Deployment secrets use environment variables; an explicitly entered Gemini fallback key may be held only in React memory and the request that uses it, never browser storage or logs.
 
 ## File Organization
 

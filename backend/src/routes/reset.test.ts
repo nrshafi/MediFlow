@@ -11,6 +11,7 @@ import { resetAndSeedDatabase, SEEDED_PATIENT_COUNT } from "../db/seed";
 import { patients, simulationEvents } from "../db/schema";
 import * as schema from "../db/schema";
 import { advanceSimulation, getSimulationStatus } from "../simulation/clock";
+import { GEMINI_API_KEY_HEADER } from "@mediflow/shared";
 
 const migrationsFolder = fileURLToPath(
   new URL("../../drizzle", import.meta.url),
@@ -109,7 +110,7 @@ test("authorized demo reset restores the canonical minute-zero fixture", async (
         headers: {
           Origin: "https://mediflow.example",
           "Access-Control-Request-Method": "POST",
-          "Access-Control-Request-Headers": "Authorization",
+          "Access-Control-Request-Headers": `Authorization, ${GEMINI_API_KEY_HEADER}`,
         },
       },
       { DEMO_RESET_TOKEN: resetToken },
@@ -118,6 +119,10 @@ test("authorized demo reset restores the canonical minute-zero fixture", async (
     assert.match(
       preflightResponse.headers.get("Access-Control-Allow-Headers") ?? "",
       /Authorization/i,
+    );
+    assert.match(
+      preflightResponse.headers.get("Access-Control-Allow-Headers") ?? "",
+      new RegExp(GEMINI_API_KEY_HEADER, "i"),
     );
   } finally {
     client.close();

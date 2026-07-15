@@ -3,6 +3,7 @@ import type {
   ApiSuccess,
   HealthStatus,
 } from "@mediflow/shared";
+import { GEMINI_API_KEY_HEADER } from "@mediflow/shared";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { createOperationsHandler } from "./routes/operations";
@@ -18,6 +19,7 @@ import {
   SimulationInvariantError,
   SimulationNotInitializedError,
 } from "./simulation/clock";
+import { InvalidGeminiApiKeyError } from "./llm/api-key";
 
 export function createApp(databaseFactory?: DatabaseFactory) {
   const app = new Hono<AppEnvironment>();
@@ -31,7 +33,7 @@ export function createApp(databaseFactory?: DatabaseFactory) {
     cors({
       origin: "*",
       allowMethods: ["GET", "POST", "OPTIONS"],
-      allowHeaders: ["Authorization", "Content-Type"],
+      allowHeaders: ["Authorization", "Content-Type", GEMINI_API_KEY_HEADER],
     }),
   );
 
@@ -73,6 +75,12 @@ export function createApp(databaseFactory?: DatabaseFactory) {
         error: { code: "SIMULATION_CONFLICT", message: error.message },
       };
       return context.json(response, 409);
+    }
+    if (error instanceof InvalidGeminiApiKeyError) {
+      const response: ApiError = {
+        error: { code: "INVALID_GEMINI_API_KEY", message: error.message },
+      };
+      return context.json(response, 400);
     }
 
     if (error instanceof SimulationInvariantError) {

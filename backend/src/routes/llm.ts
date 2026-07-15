@@ -4,9 +4,11 @@ import type {
   DoctorBriefResult,
   Patient,
 } from "@mediflow/shared";
+import { GEMINI_API_KEY_HEADER } from "@mediflow/shared";
 import type { Handler } from "hono";
 import { createDatabase } from "../db/client";
 import { generateDoctorBrief } from "../llm/service";
+import { parseGeminiFallbackApiKey } from "../llm/api-key";
 import { getOperationsSnapshot } from "../services/operations";
 import type { AppEnvironment, DatabaseFactory } from "./simulation";
 
@@ -64,6 +66,9 @@ export function createDoctorBriefHandler(
   databaseFactory: DatabaseFactory = createDatabase,
 ): Handler<AppEnvironment> {
   return async (context) => {
+    const fallbackApiKey = parseGeminiFallbackApiKey(
+      context.req.header(GEMINI_API_KEY_HEADER),
+    );
     const patientId = (context.req.param("patientId") ?? "").trim();
     const database = databaseFactory(context.env);
     const snapshot = await getOperationsSnapshot(database);
@@ -78,6 +83,7 @@ export function createDoctorBriefHandler(
       database,
       bindings: context.env,
       patient,
+      fallbackApiKey,
     });
     const data: DoctorBriefResult = {
       patientId,

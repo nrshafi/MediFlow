@@ -35,6 +35,10 @@ export type {
   TimelineEvent,
   Treatment,
 } from "./domain";
+export {
+  GEMINI_API_KEY_HEADER,
+  MAX_GEMINI_API_KEY_LENGTH,
+} from "./contracts";
 export type {
   ApiError,
   ApiErrorDetail,

@@ -8,7 +8,7 @@
 | Charts       | Chart.js                                                      | Queue, wait-time, and utilization visualizations           |
 | Backend      | Hono (TypeScript) on Cloudflare Workers                       | REST API, scheduling engine, simulation, LLM adapter       |
 | Database     | Turso (edge-hosted SQLite / libSQL) + Drizzle ORM             | Resources, patients, queue state, events, metric snapshots |
-| LLM          | Gemini API (single key, behind a provider-agnostic adapter)   | Natural-language explanations + pre-consultation summaries |
+| LLM          | Gemini API (configured key with session fallback, behind a provider-agnostic adapter) | Natural-language explanations + pre-consultation summaries |
 | Live updates | REST polling (every few seconds)                              | Keeps dashboard and patient views current — no WebSockets  |
 | Hosting & CI | Cloudflare Pages (frontend), Cloudflare Workers (API), GitHub | Deployment, version control, CI                            |
 
@@ -66,10 +66,12 @@ The npm-workspace monorepo layout was implemented on 2026-07-15.
 - No real authentication in the MVP *(decided 2026-07-14)* — the system serves simulated data only, so nothing sensitive is exposed
 - A client-side role switcher selects the view: Staff dashboard / Doctor brief / Patient guidance
 - Revisit before any deployment that touches real hospital data — real auth becomes mandatory then
-- Secrets (LLM API key, Turso credentials) live in Cloudflare Workers environment variables — never in code, the repo, or the client
+- Deployment secrets (LLM API key, Turso credentials) live in Cloudflare Workers environment variables — never in code or the repo
 - All traffic over HTTPS/TLS
 
 The optional demo-reset credential lives in the `DEMO_RESET_TOKEN` Worker secret and is supplied interactively; it is never included in the Pages bundle or browser storage.
+
+If `GEMINI_API_KEY` is unavailable in the Worker environment, a user may explicitly provide a Gemini API key as a session-only fallback. The frontend keeps this key only in React memory, never writes it to local/session storage, and sends it over HTTPS only on requests that can invoke Gemini. The backend validates the bounded header value at the request boundary, never logs or persists it, and always prefers the configured Worker secret when both keys are present. Closing or reloading the page clears the user-provided key.
 
 ## Invariants
 
@@ -77,5 +79,5 @@ The optional demo-reset credential lives in the `DEMO_RESET_TOKEN` Worker secret
 2. **The scheduling engine is deterministic and explainable.** Same input state → same recommendation. No ML models, no unseeded randomness.
 3. **MediFlow is an overlay, not a management system.** It never owns HMS/EMR concerns (appointments, billing, records management). It consumes only resource status and service-duration estimates.
 4. **Simulated data only in the MVP.** No real patient records enter the system.
-5. **Secrets live in environment variables** — never in code or version control.
+5. **Deployment secrets live in environment variables** — never in code or version control. An explicitly entered Gemini fallback key may exist transiently in browser and request memory only under the session-fallback rules above.
 6. **Request handlers do not run long-lived background work.** Recalculation is event-driven (arrival, stage completion, simulation tick) within Workers' short request cycles — no daemons.

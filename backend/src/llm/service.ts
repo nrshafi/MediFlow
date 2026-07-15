@@ -65,6 +65,7 @@ async function generateAndCache(input: {
   kind: "recommendation_explanation" | "doctor_brief";
   sourceHash: string;
   prompt: { system: string; prompt: string };
+  fallbackApiKey?: string;
 }): Promise<string | null> {
   const cached = await cachedContent(
     input.database,
@@ -73,7 +74,7 @@ async function generateAndCache(input: {
     input.sourceHash,
   );
   if (cached) return cached;
-  const model = createLanguageModel(input.bindings);
+  const model = createLanguageModel(input.bindings, input.fallbackApiKey);
   if (!model) return null;
   try {
     const content = await model.generate(input.prompt);
@@ -101,6 +102,7 @@ export async function explainRecommendation(input: {
   bindings: Bindings;
   patient: Patient;
   recommendation: Recommendation;
+  fallbackApiKey?: string;
 }): Promise<string | null> {
   const sourceHash = recommendationSourceHash(
     input.patient,
@@ -113,6 +115,7 @@ export async function explainRecommendation(input: {
     kind: "recommendation_explanation",
     sourceHash,
     prompt: recommendationPrompt(input.patient, input.recommendation),
+    fallbackApiKey: input.fallbackApiKey,
   });
 }
 
@@ -120,6 +123,7 @@ export async function generateDoctorBrief(input: {
   database: Database;
   bindings: Bindings;
   patient: Patient;
+  fallbackApiKey?: string;
 }): Promise<string | null> {
   const sourceHash = doctorBriefSourceHash(input.patient);
   return generateAndCache({
@@ -129,5 +133,6 @@ export async function generateDoctorBrief(input: {
     kind: "doctor_brief",
     sourceHash,
     prompt: doctorBriefPrompt(input.patient),
+    fallbackApiKey: input.fallbackApiKey,
   });
 }

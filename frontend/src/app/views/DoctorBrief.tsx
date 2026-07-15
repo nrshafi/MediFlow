@@ -8,7 +8,7 @@ import { apiUrl } from "../lib/api";
 import { formatBriefContent } from "../lib/brief-format";
 
 export function DoctorBrief() {
-  const { state } = useSim();
+  const { state, geminiRequestHeaders } = useSim();
   const { patients, resources } = state;
   const doctors = useMemo(
     () => resources.filter((resource) => resource.type === "doctor"),
@@ -47,7 +47,10 @@ export function DoctorBrief() {
     setBrief(null);
     void fetch(apiUrl(`/api/patients/${encodeURIComponent(patient.id)}/brief`), {
       signal: controller.signal,
-      headers: { Accept: "application/json" },
+      headers: {
+        Accept: "application/json",
+        ...geminiRequestHeaders(),
+      },
     })
       .then(async (response) => {
         if (!response.ok) throw new Error("Brief request failed");
@@ -59,7 +62,7 @@ export function DoctorBrief() {
         setBrief(null);
       });
     return () => controller.abort();
-  }, [patient?.id]);
+  }, [geminiRequestHeaders, patient?.id]);
 
   return (
     <div className="max-w-[1300px] mx-auto px-4 sm:px-6 py-6">

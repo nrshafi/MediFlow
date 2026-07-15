@@ -6,6 +6,7 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import { fileURLToPath } from "node:url";
 import { createApp } from "../app";
+import { GEMINI_API_KEY_HEADER } from "@mediflow/shared";
 import type { Database } from "../db/client";
 import { resetAndSeedDatabase } from "../db/seed";
 import { patients } from "../db/schema";
@@ -15,7 +16,7 @@ const migrationsFolder = fileURLToPath(
   new URL("../../drizzle", import.meta.url),
 );
 
-test("tick generation caches Gemini recommendation text for polling reads", async () => {
+test("tick generation uses and caches a request Gemini key when the Worker key is unavailable", async () => {
   const client = createClient({ url: "file::memory:" });
   const database: Database = drizzle(client, { schema });
   const originalFetch = globalThis.fetch;
@@ -41,8 +42,11 @@ test("tick generation caches Gemini recommendation text for polling reads", asyn
     const app = createApp(() => database);
     const tickResponse = await app.request(
       "/api/simulation/tick",
-      { method: "POST" },
-      { GEMINI_API_KEY: "test-key", GEMINI_MODEL: "test-model" },
+      {
+        method: "POST",
+        headers: { [GEMINI_API_KEY_HEADER]: "request-test-key" },
+      },
+      { GEMINI_MODEL: "test-model" },
     );
     assert.equal(tickResponse.status, 200);
     assert.equal(geminiCalls, 1);
@@ -60,4 +64,25 @@ test("tick generation caches Gemini recommendation text for polling reads", asyn
     globalThis.fetch = originalFetch;
     client.close();
   }
+});
+
+test("invalid request Gemini keys are rejected before simulation work", async () => {
+  const app = createApp(() => {
+    throw new Error("Database access should not occur");
+  });
+  const response = await app.request(
+    "/api/simulation/tick",
+    {
+      method: "POST",
+      headers: { [GEMINI_API_KEY_HEADER]: "x".repeat(257) },
+    },
+    {},
+  );
+  assert.equal(response.status, 400);
+  assert.deepEqual(await response.json(), {
+    error: {
+      code: "INVALID_GEMINI_API_KEY",
+      message: "The provided Gemini API key is invalid",
+    },
+  });
 });

@@ -4,6 +4,7 @@ import type {
   SimulationResetResult,
   SimState,
 } from "@mediflow/shared";
+import { GEMINI_API_KEY_HEADER } from "@mediflow/shared";
 import {
   createContext,
   useCallback,
@@ -19,8 +20,12 @@ import { apiUrl } from "../lib/api";
 interface SimContextValue {
   state: SimState;
   error: string | null;
+  hasGeminiFallbackKey: boolean;
   play: () => void;
   pause: () => void;
+  setGeminiFallbackKey: (apiKey: string) => void;
+  clearGeminiFallbackKey: () => void;
+  geminiRequestHeaders: () => Record<string, string>;
   resetDemo: (resetToken: string) => Promise<void>;
   stepNext: () => Promise<void>;
   toggleSpeed: () => void;
@@ -81,7 +86,22 @@ export function SimProvider({ children }: { children: ReactNode }) {
   const [playing, setPlaying] = useState(false);
   const [speed, setSpeed] = useState<1 | 4>(1);
   const [error, setError] = useState<string | null>(null);
+  const [geminiFallbackKey, setGeminiFallbackKeyState] = useState("");
   const tickInFlight = useRef<Promise<void> | null>(null);
+
+  const setGeminiFallbackKey = useCallback((apiKey: string) => {
+    setGeminiFallbackKeyState(apiKey.trim());
+  }, []);
+  const clearGeminiFallbackKey = useCallback(() => {
+    setGeminiFallbackKeyState("");
+  }, []);
+  const geminiRequestHeaders = useCallback(
+    (): Record<string, string> =>
+      geminiFallbackKey
+        ? { [GEMINI_API_KEY_HEADER]: geminiFallbackKey }
+        : {},
+    [geminiFallbackKey],
+  );
 
   const refresh = useCallback(async () => {
     try {
@@ -113,7 +133,10 @@ export function SimProvider({ children }: { children: ReactNode }) {
       try {
         const response = await fetch(apiUrl("/api/simulation/tick"), {
           method: "POST",
-          headers: { Accept: "application/json" },
+          headers: {
+            Accept: "application/json",
+            ...geminiRequestHeaders(),
+          },
         });
         await readJson(response);
         await refresh();
@@ -131,7 +154,7 @@ export function SimProvider({ children }: { children: ReactNode }) {
       if (tickInFlight.current === request) tickInFlight.current = null;
     });
     return request;
-  }, [refresh]);
+  }, [geminiRequestHeaders, refresh]);
 
   const resetDemo = useCallback(
     async (resetToken: string) => {
@@ -193,14 +216,31 @@ export function SimProvider({ children }: { children: ReactNode }) {
     () => ({
       state,
       error,
+      hasGeminiFallbackKey: Boolean(geminiFallbackKey),
       play,
       pause,
+      setGeminiFallbackKey,
+      clearGeminiFallbackKey,
+      geminiRequestHeaders,
       resetDemo,
       stepNext,
       toggleSpeed,
       refresh,
     }),
-    [error, pause, play, refresh, resetDemo, state, stepNext, toggleSpeed],
+    [
+      clearGeminiFallbackKey,
+      error,
+      geminiFallbackKey,
+      geminiRequestHeaders,
+      pause,
+      play,
+      refresh,
+      resetDemo,
+      setGeminiFallbackKey,
+      state,
+      stepNext,
+      toggleSpeed,
+    ],
   );
 
   return <SimContext.Provider value={value}>{children}</SimContext.Provider>;

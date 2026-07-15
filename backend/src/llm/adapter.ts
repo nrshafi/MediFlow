@@ -1,4 +1,5 @@
 import type { Bindings } from "../env";
+import { resolveGeminiApiKey } from "./api-key";
 
 export interface LanguageModel {
   readonly provider: string;
@@ -61,8 +62,11 @@ export class GeminiLanguageModel implements LanguageModel {
   }
 }
 
-export function createLanguageModel(bindings: Bindings): LanguageModel | null {
-  const apiKey = bindings.GEMINI_API_KEY?.trim();
+export function createLanguageModel(
+  bindings: Bindings,
+  fallbackApiKey?: string,
+): LanguageModel | null {
+  const apiKey = resolveGeminiApiKey(bindings, fallbackApiKey);
   if (!apiKey) return null;
   return new GeminiLanguageModel(
     apiKey,

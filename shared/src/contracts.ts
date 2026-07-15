@@ -7,6 +7,9 @@ import type {
   SimulationEventType,
 } from "./domain";
 
+export const GEMINI_API_KEY_HEADER = "X-Gemini-Api-Key";
+export const MAX_GEMINI_API_KEY_LENGTH = 256;
+
 export interface ApiSuccess<T> {
   data: T;
 }

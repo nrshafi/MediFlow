@@ -4,13 +4,15 @@ Update this file after every meaningful implementation change.
 
 ## Current Phase
 
-- Phase 9 complete — judge-facing walkthrough rehearsal
+- Phase 10 complete — session Gemini credential fallback
 
 ## Current Goal
 
-- The production reset-to-impact walkthrough is rehearsed, captured, and ready for judges
+- Gemini explanations remain available during a demo when the Worker secret is not configured
 
 ## Completed
+
+- 2026-07-15 - Added a session-only Gemini API key fallback: the top bar accepts and clears a key held only in React memory, sends it only on Gemini-capable requests, validates it at the Worker boundary, prefers the configured Worker secret, and never logs or persists the supplied key; added precedence, fallback, validation, and CORS coverage
 
 - 2026-07-15 - Rehearsed the judge-facing walkthrough end to end against production, captured the reset, live Staff, Patient, Doctor, and final-impact states, documented a four-minute talk track and recovery cues, verified 30/30 completion at minute 240, and restored the shared demo to minute zero
 
@@ -68,6 +70,8 @@ Update this file after every meaningful implementation change.
 
 ## Architecture Decisions
 
+- **Session-only Gemini key fallback** — an explicitly entered key is kept only in React memory and sent via `X-Gemini-Api-Key` on Gemini-capable requests; the Worker validates but never stores or logs it, and a configured `GEMINI_API_KEY` always takes precedence *(implemented 2026-07-15)*
+
 - **Binary non-preemptive priority semantics** — urgent patients precede normal patients in each resource queue; equal-priority patients use FIFO with patient ID as the final deterministic tie-breaker. Active services are never interrupted *(decided 2026-07-15)*
 - **Fixed-order FIFO baseline** — the identical fixture uses lab → X-ray → ECG → consultation, skips unneeded services, and applies naive FIFO without priority or reordering *(implemented 2026-07-15)*
 - **Interchangeable simulated consultations** — engine v1 may balance consultation work across the three demo doctors because no clinical suitability requirements exist in simulated data; this must be revisited before real integration *(implemented 2026-07-15)*
@@ -87,6 +91,8 @@ Update this file after every meaningful implementation change.
 - **Tailwind CSS + shadcn/ui** as the component layer *(decided 2026-07-14)*
 
 ## Session Notes
+
+- 2026-07-15: Session Gemini fallback completed. A header key can generate and cache recommendation explanations and doctor briefs only when the Worker secret is absent; reload clears the browser-held key. All 19 backend tests and strict workspace checks pass.
 
 - 2026-07-15: Production judge rehearsal completed from protected reset through all 30 patients at minute 240. MediFlow versus uncoordinated baseline: average wait 2 vs 10 minutes, visit duration 25 vs 32 minutes, utilization 46.5% vs 45%, average queue depth 0.3 vs 1.2, and peak queue depth 2 vs 5. The presenter script is in `docs/judge-walkthrough.md`, with five production captures in `artifacts/judge-walkthrough/`; the shared demo was returned to minute zero after capture.
 

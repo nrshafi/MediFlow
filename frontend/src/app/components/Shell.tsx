@@ -17,6 +17,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "./ui/tooltip";
+import { GeminiKeyDialog } from "./GeminiKeyDialog";
 
 function ResetDemoDialog() {
   const { resetDemo } = useSim();
@@ -225,6 +226,7 @@ function SimControls() {
   return (
     <TooltipProvider delayDuration={200}>
       <div className="flex items-center gap-1.5">
+        <GeminiKeyDialog />
         <Tooltip>
           <TooltipTrigger asChild>
             <button className={btn} style={btnStyle} onClick={() => (state.playing ? pause() : play())} aria-label={state.playing ? "Pause simulation" : "Play simulation"} disabled={simulationComplete}>

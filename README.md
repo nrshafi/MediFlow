@@ -18,6 +18,7 @@ Requirements: Node.js 20.19 or newer, npm 11, and a Turso database.
 2. Copy `backend/.dev.vars.example` to `backend/.dev.vars`.
 3. Set `TURSO_DATABASE_URL` and `TURSO_AUTH_TOKEN` in that file.
 4. Set `GEMINI_API_KEY` to enable Gemini explanations and summaries. Without it, scheduling works unchanged and the UI uses explicit deterministic text fallbacks.
+   You can also add a session-only fallback key from the key button in the application header. The Worker secret takes precedence; the fallback key remains only in React memory and clears on reload.
 5. Apply migrations and load the reproducible fixture:
 
    ```powershell
@@ -52,6 +53,8 @@ The Worker never runs migrations or seed/reset operations during a request.
 - `GET /api/operations` — shared polling snapshot for all three frontend views
 - `GET /api/patients/:patientId/brief` — cached Gemini pre-consultation summary or deterministic fallback
 
+Requests to the tick and doctor-brief endpoints may include `X-Gemini-Api-Key` as a session-only fallback when the Worker has no `GEMINI_API_KEY`. The header value is bounded and validated, is never logged or persisted, and is ignored whenever the configured Worker secret is available.
+
 Every tick completes due work, registers arrivals, applies urgent-before-normal queues without preemption, balances interchangeable simulated consultations, starts idle resources, records recommendations and metrics, and persists one ordered audit trail.
 
 ## Deployment
@@ -71,6 +74,8 @@ npx wrangler secret put DEMO_RESET_TOKEN --config backend/wrangler.jsonc
 ```
 
 The Staff view asks for this credential at reset time. It is sent only in that request and is not bundled into the frontend or persisted in browser storage.
+
+The Gemini key button similarly accepts an optional session fallback for demos where the Worker secret is unavailable. It is held only in page memory, sent only on Gemini-capable requests, and cleared by a reload or tab close.
 
 Build `frontend/` for Cloudflare Pages. If Pages and the Worker do not share an origin, set `VITE_API_BASE_URL` to the deployed Worker origin before building. The MVP API permits cross-origin GET/POST access because it serves simulated data only; introduce real authentication and a restricted origin policy before using any real hospital data.
 

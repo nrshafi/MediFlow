@@ -3,12 +3,17 @@ import type {
   SimulationStatus,
   SimulationTickResult,
 } from "@mediflow/shared";
+import { GEMINI_API_KEY_HEADER } from "@mediflow/shared";
 import type { Handler } from "hono";
 import { createDatabase, type Database } from "../db/client";
 import type { Bindings } from "../env";
 import { advanceSimulation, getSimulationStatus } from "../simulation/clock";
 import { getOperationsSnapshot } from "../services/operations";
 import { explainRecommendation } from "../llm/service";
+import {
+  parseGeminiFallbackApiKey,
+  resolveGeminiApiKey,
+} from "../llm/api-key";
 
 export type AppEnvironment = {
   Bindings: Bindings;
@@ -29,6 +34,9 @@ export function createSimulationHandlers(
       return context.json(response);
     },
     tick: async (context) => {
+      const fallbackApiKey = parseGeminiFallbackApiKey(
+        context.req.header(GEMINI_API_KEY_HEADER),
+      );
       const database = databaseFactory(context.env);
       const data = await advanceSimulation(database);
       const patientIds = [
@@ -38,7 +46,10 @@ export function createSimulationHandlers(
             .flatMap((event) => (event.patientId ? [event.patientId] : [])),
         ),
       ];
-      if (patientIds.length > 0 && context.env.GEMINI_API_KEY?.trim()) {
+      if (
+        patientIds.length > 0 &&
+        resolveGeminiApiKey(context.env, fallbackApiKey)
+      ) {
         const snapshot = await getOperationsSnapshot(database);
         const patientById = new Map(
           snapshot.patients.map((patient) => [patient.id, patient]),
@@ -53,6 +64,7 @@ export function createSimulationHandlers(
               bindings: context.env,
               patient,
               recommendation,
+              fallbackApiKey,
             });
           }),
         );
