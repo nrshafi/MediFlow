@@ -4,6 +4,9 @@
 TURSO_DATABASE_URL="libsql://your-database-name-your-org.turso.io"
 TURSO_AUTH_TOKEN="your-turso-auth-token"
 
+# Optional demo-only control. Required to enable POST /api/simulation/reset.
+DEMO_RESET_TOKEN="generate-a-long-random-reset-token"
+
 # Optional until the language layer is exercised. Scheduling never depends on it.
 GEMINI_API_KEY="your-gemini-api-key"
-GEMINI_MODEL="gemini-3.5-flash"
+GEMINI_MODEL="gemini-3.1-flash-lite"

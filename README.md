@@ -48,6 +48,7 @@ The Worker never runs migrations or seed/reset operations during a request.
 - `GET /api/health` — service health
 - `GET /api/simulation` — persistent clock and patient counts
 - `POST /api/simulation/tick` — atomically advance exactly one simulated minute
+- `POST /api/simulation/reset` — restore the canonical minute-zero fixture; disabled unless `DEMO_RESET_TOKEN` is configured and protected by a bearer credential
 - `GET /api/operations` — shared polling snapshot for all three frontend views
 - `GET /api/patients/:patientId/brief` — cached Gemini pre-consultation summary or deterministic fallback
 
@@ -60,7 +61,16 @@ Deploy the backend as a Cloudflare Worker and configure these secrets/variables:
 - `TURSO_DATABASE_URL`
 - `TURSO_AUTH_TOKEN`
 - `GEMINI_API_KEY`
-- `GEMINI_MODEL` (optional; defaults to `gemini-3.5-flash`)
+- `GEMINI_MODEL` (optional; defaults to `gemini-3.1-flash-lite`)
+- `DEMO_RESET_TOKEN` (optional; enables the protected Staff-view demo reset)
+
+Set the reset credential as a Worker secret rather than a plain Wrangler variable:
+
+```powershell
+npx wrangler secret put DEMO_RESET_TOKEN --config backend/wrangler.jsonc
+```
+
+The Staff view asks for this credential at reset time. It is sent only in that request and is not bundled into the frontend or persisted in browser storage.
 
 Build `frontend/` for Cloudflare Pages. If Pages and the Worker do not share an origin, set `VITE_API_BASE_URL` to the deployed Worker origin before building. The MVP API permits cross-origin GET/POST access because it serves simulated data only; introduce real authentication and a restricted origin policy before using any real hospital data.
 

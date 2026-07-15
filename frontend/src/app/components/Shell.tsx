@@ -1,13 +1,163 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router";
-import { Pause, Play, StepForward } from "lucide-react";
+import { LoaderCircle, Pause, Play, RotateCcw, StepForward } from "lucide-react";
 import { useSim, formatSimClock } from "../store/SimContext";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "./ui/dialog";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "./ui/tooltip";
+
+function ResetDemoDialog() {
+  const { resetDemo } = useSim();
+  const [open, setOpen] = useState(false);
+  const [resetToken, setResetToken] = useState("");
+  const [resetError, setResetError] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+
+  const handleOpenChange = (nextOpen: boolean) => {
+    if (submitting) return;
+    setOpen(nextOpen);
+    if (!nextOpen) {
+      setResetToken("");
+      setResetError(null);
+    }
+  };
+
+  const handleReset = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!resetToken.trim() || submitting) return;
+    setSubmitting(true);
+    setResetError(null);
+    try {
+      await resetDemo(resetToken);
+      setOpen(false);
+      setResetToken("");
+    } catch (requestError) {
+      setResetError(
+        requestError instanceof Error
+          ? requestError.message
+          : "Unable to reset the demo",
+      );
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={handleOpenChange}>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <DialogTrigger asChild>
+            <button
+              className="flex size-8 items-center justify-center rounded-md transition-colors"
+              style={{
+                border: "1px solid var(--border-default)",
+                color: "var(--state-warning)",
+                backgroundColor: "var(--bg-surface)",
+              }}
+              aria-label="Reset the shared demo"
+            >
+              <RotateCcw className="size-4" />
+            </button>
+          </DialogTrigger>
+        </TooltipTrigger>
+        <TooltipContent>Reset demo</TooltipContent>
+      </Tooltip>
+      <DialogContent
+        className="border-[var(--border-default)] bg-[var(--bg-raised)] sm:max-w-md"
+        onEscapeKeyDown={(event) => {
+          if (submitting) event.preventDefault();
+        }}
+        onPointerDownOutside={(event) => {
+          if (submitting) event.preventDefault();
+        }}
+      >
+        <form className="flex flex-col gap-5" onSubmit={handleReset}>
+          <DialogHeader>
+            <span
+              className="font-mono text-[11px] uppercase tracking-[0.12em] text-[var(--state-warning)]"
+              aria-hidden="true"
+            >
+              Shared state control
+            </span>
+            <DialogTitle className="text-[var(--text-primary)]">
+              Reset the simulated day?
+            </DialogTitle>
+            <DialogDescription className="leading-6 text-[var(--text-muted)]">
+              Every connected viewer will return to minute zero. All generated
+              demo events and cached summaries will be replaced with the
+              canonical 30-patient fixture.
+            </DialogDescription>
+          </DialogHeader>
+
+          <label className="flex flex-col gap-2" htmlFor="demo-reset-token">
+            <span className="font-mono text-[11px] uppercase tracking-[0.1em] text-[var(--text-muted)]">
+              Demo reset key
+            </span>
+            <input
+              id="demo-reset-token"
+              name="demo-reset-token"
+              type="password"
+              autoComplete="off"
+              value={resetToken}
+              onChange={(event) => setResetToken(event.target.value)}
+              disabled={submitting}
+              className="h-10 rounded-md border border-[var(--border-default)] bg-[var(--bg-surface)] px-3 text-sm text-[var(--text-primary)] outline-none placeholder:text-[var(--text-muted)] focus:border-[var(--accent-primary)] disabled:cursor-not-allowed disabled:opacity-50"
+              placeholder="Enter the Worker secret"
+              aria-describedby={resetError ? "demo-reset-error" : undefined}
+              aria-invalid={resetError ? true : undefined}
+              autoFocus
+            />
+          </label>
+
+          {resetError ? (
+            <p
+              id="demo-reset-error"
+              role="alert"
+              className="text-sm text-[var(--state-error)]"
+            >
+              {resetError}
+            </p>
+          ) : null}
+
+          <DialogFooter>
+            <button
+              type="button"
+              onClick={() => handleOpenChange(false)}
+              disabled={submitting}
+              className="h-10 rounded-md border border-[var(--border-default)] px-4 text-sm text-[var(--text-primary)] transition-colors hover:bg-[var(--bg-surface)] disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={!resetToken.trim() || submitting}
+              className="inline-flex h-10 items-center justify-center gap-2 rounded-md border border-[var(--state-warning)] bg-[color-mix(in_srgb,var(--state-warning)_12%,transparent)] px-4 font-mono text-[11px] uppercase tracking-[0.08em] text-[var(--state-warning)] transition-colors hover:bg-[color-mix(in_srgb,var(--state-warning)_18%,transparent)] disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              {submitting ? (
+                <LoaderCircle className="size-4 animate-spin" aria-hidden="true" />
+              ) : (
+                <RotateCcw className="size-4" aria-hidden="true" />
+              )}
+              {submitting ? "Resetting" : "Reset shared demo"}
+            </button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
 
 const ROLES: Array<{ key: string; label: string; path: string }> = [
   { key: "staff", label: "STAFF", path: "/staff" },
@@ -58,6 +208,7 @@ function RoleSwitcher() {
 }
 
 function SimControls() {
+  const location = useLocation();
   const {
     state,
     play,
@@ -65,14 +216,18 @@ function SimControls() {
     stepNext,
     toggleSpeed,
   } = useSim();
-  const btn = "flex items-center justify-center rounded-md h-8 w-8 transition-colors disabled:cursor-not-allowed disabled:opacity-40";
+  const simulationComplete =
+    state.patients.length > 0 &&
+    state.metrics.live.completed >= state.patients.length;
+  const showReset = location.pathname.startsWith("/staff");
+  const btn = "flex size-8 items-center justify-center rounded-md transition-colors disabled:cursor-not-allowed disabled:opacity-40";
   const btnStyle = { border: "1px solid var(--border-default)", color: "var(--text-primary)", backgroundColor: "var(--bg-surface)" };
   return (
     <TooltipProvider delayDuration={200}>
       <div className="flex items-center gap-1.5">
         <Tooltip>
           <TooltipTrigger asChild>
-            <button className={btn} style={btnStyle} onClick={() => (state.playing ? pause() : play())} aria-label={state.playing ? "Pause simulation" : "Play simulation"}>
+            <button className={btn} style={btnStyle} onClick={() => (state.playing ? pause() : play())} aria-label={state.playing ? "Pause simulation" : "Play simulation"} disabled={simulationComplete}>
               {state.playing ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
             </button>
           </TooltipTrigger>
@@ -85,6 +240,7 @@ function SimControls() {
               style={btnStyle}
               onClick={stepNext}
               aria-label="Go to next simulation minute"
+              disabled={simulationComplete}
             >
               <StepForward className="h-4 w-4" />
             </button>
@@ -104,6 +260,7 @@ function SimControls() {
           </TooltipTrigger>
           <TooltipContent>Speed 1× / 4×</TooltipContent>
         </Tooltip>
+        {showReset ? <ResetDemoDialog /> : null}
       </div>
     </TooltipProvider>
   );

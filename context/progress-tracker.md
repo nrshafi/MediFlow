@@ -4,13 +4,17 @@ Update this file after every meaningful implementation change.
 
 ## Current Phase
 
-- Phase 6 complete — MVP implementation and acceptance verification finished
+- Phase 7 complete — deployed-demo reset and production verification
 
 ## Current Goal
 
-- MVP complete; remaining work is environment configuration and deployment
+- Live shared demo is safely replayable from the Staff view and restored to the canonical minute-zero state
 
 ## Completed
+
+- 2026-07-15 - Deployed the protected reset Worker and production Pages bundle, verified the public site and API return HTTP 200, rejected an invalid reset credential with HTTP 401, exercised reset → tick → reset against production, confirmed a Gemini doctor brief, and left the shared 30-patient demo at minute zero
+
+- 2026-07-15 - Added a demo-only, bearer-protected reset flow: the Worker atomically restores the canonical minute-zero fixture without running migrations, the Staff view requests the credential at action time without bundling or persisting it, completed simulations disable further ticks, and reset/CORS behavior is covered by backend tests
 
 - 2026-07-15 - Completed deterministic before/after metrics with a fixed-order FIFO baseline and per-tick live snapshots for wait, visit duration, utilization, average queue depth, and peak queue depth; added a second committed migration without modifying the applied initial migration
 
@@ -49,9 +53,9 @@ Update this file after every meaningful implementation change.
 
 ## Next Up
 
-1. Configure Turso and Gemini credentials for the target environment
-2. Apply migrations/seed, deploy the Worker, and deploy the Pages frontend
-3. Revisit authentication and restricted CORS before any real-data integration
+1. Rehearse and record the judge-facing walkthrough from reset through final impact metrics
+2. Add production monitoring/alert review and restrict CORS plus public mutation access before broader sharing
+3. Revisit authentication before any real-data integration
 
 ## Open Questions
 
@@ -78,6 +82,8 @@ Update this file after every meaningful implementation change.
 - **Tailwind CSS + shadcn/ui** as the component layer *(decided 2026-07-14)*
 
 ## Session Notes
+
+- 2026-07-15: Demo reset hardening deployed. Worker version `d5c6ddeb-f702-4062-a462-40ec2a8b808b` serves the protected reset route; the production Pages bundle contains the Staff reset dialog. Production smoke testing verified unauthorized rejection, atomic minute-zero restoration, one-minute playback, Gemini brief generation, and a final clean reset to 0 arrived / 0 completed patients.
 
 - 2026-07-15: MVP completion audit passed. The complete-day test verifies 30/30 patient completion, all consultations and required services completed, and improvement over baseline in average wait, visit duration, utilization, average queue depth, and peak queue depth. The suite has 15 passing tests; strict checks and all production builds pass; the built frontend smoke test returns HTTP 200.
 

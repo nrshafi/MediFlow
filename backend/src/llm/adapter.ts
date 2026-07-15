@@ -66,6 +66,6 @@ export function createLanguageModel(bindings: Bindings): LanguageModel | null {
   if (!apiKey) return null;
   return new GeminiLanguageModel(
     apiKey,
-    bindings.GEMINI_MODEL?.trim() || "gemini-3.5-flash",
+    bindings.GEMINI_MODEL?.trim() || "gemini-3.1-flash-lite",
   );
 }

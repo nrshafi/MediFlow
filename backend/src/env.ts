@@ -1,4 +1,5 @@
 export interface Bindings {
+  DEMO_RESET_TOKEN?: string;
   GEMINI_API_KEY?: string;
   GEMINI_MODEL?: string;
   TURSO_AUTH_TOKEN?: string;

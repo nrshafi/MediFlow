@@ -29,7 +29,7 @@ The npm-workspace monorepo layout was implemented on 2026-07-15.
 
 - **Turso (SQLite)**: everything persistent — resource definitions (3 doctors, 1 lab, 1 X-ray, 1 ECG) and live status, simulated patients with medical histories, queue/visit state, scheduling events, cached LLM outputs, metric snapshots
 - **Normalized operational schema**: static resource definitions are separated from mutable resource state and queue positions; patient identity/visit state is separated from required services, timeline entries, and the five medical-history record types. Simulation events, metric snapshots, and cached LLM text use append-oriented tables so scheduling decisions remain auditable.
-- **Development lifecycle**: Drizzle Kit generates committed SQLite migrations from `backend/src/db/schema.ts`; a Node-only seed command applies pending migrations and replaces simulation data with the canonical deterministic fixture. Worker request code never runs migrations or seeds.
+- **Development lifecycle**: Drizzle Kit generates committed SQLite migrations from `backend/src/db/schema.ts`; a Node-only seed command applies pending migrations and replaces simulation data with the canonical deterministic fixture. Worker request code never runs migrations. A narrowly scoped demo-reset route may replace simulation data with the already-committed canonical fixture, but only after authenticating a dedicated reset secret and never as part of a normal polling or tick request.
 - **No blob/file storage**: the MVP produces no files or media; LLM outputs are short text stored inline
 - **Simulated data only**: seed scripts generate all patients and histories — no real patient records anywhere
 
@@ -40,6 +40,13 @@ The npm-workspace monorepo layout was implemented on 2026-07-15.
 - Within a minute, the clock event is recorded first, due active services are completed in patient-ID order, and newly due arrivals are registered in patient-ID order. Event rows carry an explicit order within their simulation minute.
 - Completing a service clears the patient/resource active-service state, closes the open timeline entry, and marks the matching required service complete. After completions and arrivals are applied in memory, the deterministic scheduler queues next steps and starts idle resources within the same atomic tick batch.
 - `GET /api/simulation` returns the persisted clock plus patient counts. No request handler owns a timer or performs background work.
+
+## Demo Reset Semantics
+
+- `POST /api/simulation/reset` is a simulated-data demonstration control, not a general administration API. It is disabled unless the Worker has a `DEMO_RESET_TOKEN` secret and requires that token as a bearer credential on every request.
+- A successful reset atomically replaces all simulated operational, history, event, metric, and cached LLM rows with the canonical deterministic fixture and returns the fresh minute-zero simulation state. It applies no migrations and accepts no caller-provided seed or patient data.
+- The frontend exposes reset only in the Staff view, asks for the reset credential at action time, never bundles or persists it, pauses local playback, and refreshes the shared snapshot after success.
+- Reset invalidates the shared demo state for every connected viewer. This behavior is acceptable only for the simulated-data MVP and must be replaced by authenticated, tenant-scoped administration before any real-data integration.
 
 ## Scheduling Semantics
 
@@ -61,6 +68,8 @@ The npm-workspace monorepo layout was implemented on 2026-07-15.
 - Revisit before any deployment that touches real hospital data — real auth becomes mandatory then
 - Secrets (LLM API key, Turso credentials) live in Cloudflare Workers environment variables — never in code, the repo, or the client
 - All traffic over HTTPS/TLS
+
+The optional demo-reset credential lives in the `DEMO_RESET_TOKEN` Worker secret and is supplied interactively; it is never included in the Pages bundle or browser storage.
 
 ## Invariants
 

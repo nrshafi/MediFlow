@@ -7,6 +7,7 @@ import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { createOperationsHandler } from "./routes/operations";
 import { createDoctorBriefHandler } from "./routes/llm";
+import { createResetHandler } from "./routes/reset";
 import {
   createSimulationHandlers,
   type AppEnvironment,
@@ -23,13 +24,14 @@ export function createApp(databaseFactory?: DatabaseFactory) {
   const simulation = createSimulationHandlers(databaseFactory);
   const operations = createOperationsHandler(databaseFactory);
   const doctorBrief = createDoctorBriefHandler(databaseFactory);
+  const reset = createResetHandler(databaseFactory);
 
   app.use(
     "/api/*",
     cors({
       origin: "*",
       allowMethods: ["GET", "POST", "OPTIONS"],
-      allowHeaders: ["Content-Type"],
+      allowHeaders: ["Authorization", "Content-Type"],
     }),
   );
 
@@ -42,6 +44,7 @@ export function createApp(databaseFactory?: DatabaseFactory) {
 
   app.get("/api/simulation", simulation.getState);
   app.post("/api/simulation/tick", simulation.tick);
+  app.post("/api/simulation/reset", reset);
   app.get("/api/operations", operations);
   app.get("/api/patients/:patientId/brief", doctorBrief);
 

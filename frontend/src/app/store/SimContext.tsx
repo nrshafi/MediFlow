@@ -1,4 +1,9 @@
-import type { ApiSuccess, OperationsSnapshot, SimState } from "@mediflow/shared";
+import type {
+  ApiSuccess,
+  OperationsSnapshot,
+  SimulationResetResult,
+  SimState,
+} from "@mediflow/shared";
 import {
   createContext,
   useCallback,
@@ -16,6 +21,7 @@ interface SimContextValue {
   error: string | null;
   play: () => void;
   pause: () => void;
+  resetDemo: (resetToken: string) => Promise<void>;
   stepNext: () => Promise<void>;
   toggleSpeed: () => void;
   refresh: () => Promise<void>;
@@ -75,7 +81,7 @@ export function SimProvider({ children }: { children: ReactNode }) {
   const [playing, setPlaying] = useState(false);
   const [speed, setSpeed] = useState<1 | 4>(1);
   const [error, setError] = useState<string | null>(null);
-  const tickInFlight = useRef(false);
+  const tickInFlight = useRef<Promise<void> | null>(null);
 
   const refresh = useCallback(async () => {
     try {
@@ -100,27 +106,51 @@ export function SimProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  const stepNext = useCallback(async () => {
-    if (tickInFlight.current) return;
-    tickInFlight.current = true;
-    try {
-      const response = await fetch(apiUrl("/api/simulation/tick"), {
-        method: "POST",
-        headers: { Accept: "application/json" },
-      });
-      await readJson(response);
-      await refresh();
-    } catch (requestError) {
-      setPlaying(false);
-      setError(
-        requestError instanceof Error
-          ? requestError.message
-          : "Unable to advance the simulation",
-      );
-    } finally {
-      tickInFlight.current = false;
-    }
+  const stepNext = useCallback((): Promise<void> => {
+    if (tickInFlight.current) return tickInFlight.current;
+
+    const request = (async () => {
+      try {
+        const response = await fetch(apiUrl("/api/simulation/tick"), {
+          method: "POST",
+          headers: { Accept: "application/json" },
+        });
+        await readJson(response);
+        await refresh();
+      } catch (requestError) {
+        setPlaying(false);
+        setError(
+          requestError instanceof Error
+            ? requestError.message
+            : "Unable to advance the simulation",
+        );
+      }
+    })();
+    tickInFlight.current = request;
+    void request.finally(() => {
+      if (tickInFlight.current === request) tickInFlight.current = null;
+    });
+    return request;
   }, [refresh]);
+
+  const resetDemo = useCallback(
+    async (resetToken: string) => {
+      setPlaying(false);
+      const pendingTick = tickInFlight.current;
+      if (pendingTick) await pendingTick;
+
+      const response = await fetch(apiUrl("/api/simulation/reset"), {
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+          Authorization: `Bearer ${resetToken.trim()}`,
+        },
+      });
+      await readJson<SimulationResetResult>(response);
+      await refresh();
+    },
+    [refresh],
+  );
 
   useEffect(() => {
     void refresh();
@@ -160,8 +190,17 @@ export function SimProvider({ children }: { children: ReactNode }) {
   }, [playing, snapshot, speed]);
 
   const value = useMemo(
-    () => ({ state, error, play, pause, stepNext, toggleSpeed, refresh }),
-    [error, pause, play, refresh, state, stepNext, toggleSpeed],
+    () => ({
+      state,
+      error,
+      play,
+      pause,
+      resetDemo,
+      stepNext,
+      toggleSpeed,
+      refresh,
+    }),
+    [error, pause, play, refresh, resetDemo, state, stepNext, toggleSpeed],
   );
 
   return <SimContext.Provider value={value}>{children}</SimContext.Provider>;

@@ -43,6 +43,7 @@ export type {
   HealthStatus,
   OperationsSnapshot,
   SimulationStatus,
+  SimulationResetResult,
   SimulationTickEvent,
   SimulationTickResult,
 } from "./contracts";

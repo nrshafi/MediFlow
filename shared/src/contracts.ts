@@ -49,6 +49,10 @@ export interface SimulationTickResult {
   events: SimulationTickEvent[];
 }
 
+export interface SimulationResetResult {
+  state: SimulationStatus;
+}
+
 export interface OperationsSnapshot {
   simulation: SimulationStatus;
   patients: Patient[];
