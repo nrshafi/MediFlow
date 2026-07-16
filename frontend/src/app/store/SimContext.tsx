@@ -85,7 +85,7 @@ async function readJson<T>(response: Response): Promise<T> {
 export function SimProvider({ children }: { children: ReactNode }) {
   const [snapshot, setSnapshot] = useState<OperationsSnapshot | null>(null);
   const [playing, setPlaying] = useState(false);
-  const [speed, setSpeed] = useState<1 | 4>(1);
+  const [speed, setSpeed] = useState<SimState["speed"]>(1);
   const [error, setError] = useState<string | null>(null);
   const [geminiFallbackKey, setGeminiFallbackKeyState] = useState("");
   const tickInFlight = useRef<Promise<void> | null>(null);
@@ -206,7 +206,12 @@ export function SimProvider({ children }: { children: ReactNode }) {
   const play = useCallback(() => setPlaying(true), []);
   const pause = useCallback(() => setPlaying(false), []);
   const toggleSpeed = useCallback(
-    () => setSpeed((current) => (current === 1 ? 4 : 1)),
+    () =>
+      setSpeed((current) => {
+        if (current === 1) return 4;
+        if (current === 4) return 10;
+        return 1;
+      }),
     [],
   );
 

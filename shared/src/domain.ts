@@ -168,7 +168,7 @@ export interface Metrics {
 export interface SimState {
   minute: number; // minutes since 09:00
   playing: boolean;
-  speed: 1 | 4;
+  speed: 1 | 4 | 10;
   patients: Patient[];
   resources: Resource[];
   recommendations: Record<string, Recommendation>;

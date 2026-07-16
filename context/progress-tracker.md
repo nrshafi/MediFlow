@@ -12,6 +12,8 @@ Update this file after every meaningful implementation change.
 
 ## Completed
 
+- 2026-07-16 - Added 10× client-side simulation playback alongside 1× and 4× while preserving one-minute API ticks
+
 - 2026-07-16 - Added a read-only Gemini model check before a user-provided key enters React memory, surfaced inline verification failures, re-verified session keys before the demo-reset authorization exception, and added success, invalid-key, transient-failure, and reset-authorization coverage
 
 - 2026-07-16 - Allowed a user-provided session Gemini key to authorize demo reset without the separate reset key only when no configured Worker Gemini key is active; kept reset-token protection when the Worker key takes precedence and added UI fallback plus backend coverage
@@ -97,6 +99,8 @@ Update this file after every meaningful implementation change.
 - **Tailwind CSS + shadcn/ui** as the component layer *(decided 2026-07-14)*
 
 ## Session Notes
+
+- 2026-07-16: The top-bar speed control now cycles 1× → 4× → 10× → 1×. Faster playback changes only client request cadence; each backend request still advances exactly one simulated minute.
 
 - 2026-07-16: User-provided Gemini keys now pass a small `models.get` request for the configured model before MediFlow marks them ready. Invalid or currently unusable keys remain outside session state, and reset independently repeats the check before treating a session key as authorization.
 

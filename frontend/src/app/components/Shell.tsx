@@ -297,7 +297,7 @@ function SimControls() {
               {state.speed}×
             </button>
           </TooltipTrigger>
-          <TooltipContent>Speed 1× / 4×</TooltipContent>
+          <TooltipContent>Speed 1× / 4× / 10×</TooltipContent>
         </Tooltip> : null}
         {showReset ? <ResetDemoDialog /> : null}
       </div>
