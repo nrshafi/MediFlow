@@ -12,6 +12,8 @@ Update this file after every meaningful implementation change.
 
 ## Completed
 
+- 2026-07-16 - Allowed a user-provided session Gemini key to authorize demo reset without the separate reset key only when no configured Worker Gemini key is active; kept reset-token protection when the Worker key takes precedence and added UI fallback plus backend coverage
+
 - 2026-07-16 - Completed the actionable-control audit: replaced the inert Doctor Brief consultation/skip controls with patient-guidance navigation and queue selection, deep-linked the Patient view to the selected patient, replaced permanently disabled completed-day playback controls with a status badge, made empty key forms return inline validation instead of gray submit buttons, and added keyboard/accessible labels to adjacent patient controls
 
 - 2026-07-15 - Added a session-only Gemini API key fallback: the top bar accepts and clears a key held only in React memory, sends it only on Gemini-capable requests, validates it at the Worker boundary, prefers the configured Worker secret, and never logs or persists the supplied key; added precedence, fallback, validation, and CORS coverage
@@ -93,6 +95,8 @@ Update this file after every meaningful implementation change.
 - **Tailwind CSS + shadcn/ui** as the component layer *(decided 2026-07-14)*
 
 ## Session Notes
+
+- 2026-07-16: Staff reset now first uses the in-memory session Gemini key when the Worker has no configured Gemini key. If that exception is unavailable, the reset dialog requests the dedicated reset credential and the existing bearer-token path remains authoritative.
 
 - 2026-07-16: All visible application buttons now have observable behavior when available; unavailable completed-day playback actions are no longer rendered as disabled controls. Doctor actions preserve the deterministic scheduler boundary by navigating to patient guidance or selecting the next queued patient instead of pretending to start or skip clinical work client-side.
 

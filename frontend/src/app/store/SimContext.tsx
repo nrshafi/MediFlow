@@ -26,7 +26,7 @@ interface SimContextValue {
   setGeminiFallbackKey: (apiKey: string) => void;
   clearGeminiFallbackKey: () => void;
   geminiRequestHeaders: () => Record<string, string>;
-  resetDemo: (resetToken: string) => Promise<void>;
+  resetDemo: (resetToken?: string) => Promise<void>;
   stepNext: () => Promise<void>;
   toggleSpeed: () => void;
   refresh: () => Promise<void>;
@@ -157,7 +157,7 @@ export function SimProvider({ children }: { children: ReactNode }) {
   }, [geminiRequestHeaders, refresh]);
 
   const resetDemo = useCallback(
-    async (resetToken: string) => {
+    async (resetToken?: string) => {
       setPlaying(false);
       const pendingTick = tickInFlight.current;
       if (pendingTick) await pendingTick;
@@ -166,13 +166,16 @@ export function SimProvider({ children }: { children: ReactNode }) {
         method: "POST",
         headers: {
           Accept: "application/json",
-          Authorization: `Bearer ${resetToken.trim()}`,
+          ...(resetToken?.trim()
+            ? { Authorization: `Bearer ${resetToken.trim()}` }
+            : {}),
+          ...geminiRequestHeaders(),
         },
       });
       await readJson<SimulationResetResult>(response);
       await refresh();
     },
-    [refresh],
+    [geminiRequestHeaders, refresh],
   );
 
   useEffect(() => {

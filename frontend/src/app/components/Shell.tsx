@@ -20,9 +20,10 @@ import {
 import { GeminiKeyDialog } from "./GeminiKeyDialog";
 
 function ResetDemoDialog() {
-  const { resetDemo } = useSim();
+  const { hasGeminiFallbackKey, resetDemo } = useSim();
   const [open, setOpen] = useState(false);
   const [resetToken, setResetToken] = useState("");
+  const [requiresResetToken, setRequiresResetToken] = useState(false);
   const [resetError, setResetError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
@@ -31,6 +32,7 @@ function ResetDemoDialog() {
     setOpen(nextOpen);
     if (!nextOpen) {
       setResetToken("");
+      setRequiresResetToken(false);
       setResetError(null);
     }
   };
@@ -38,17 +40,19 @@ function ResetDemoDialog() {
   const handleReset = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (submitting) return;
-    if (!resetToken.trim()) {
+    const canTrySessionKey = hasGeminiFallbackKey && !requiresResetToken;
+    if (!canTrySessionKey && !resetToken.trim()) {
       setResetError("Enter the demo reset key to continue.");
       return;
     }
     setSubmitting(true);
     setResetError(null);
     try {
-      await resetDemo(resetToken);
+      await resetDemo(canTrySessionKey ? undefined : resetToken);
       setOpen(false);
       setResetToken("");
     } catch (requestError) {
+      if (canTrySessionKey) setRequiresResetToken(true);
       setResetError(
         requestError instanceof Error
           ? requestError.message
@@ -107,7 +111,13 @@ function ResetDemoDialog() {
             </DialogDescription>
           </DialogHeader>
 
-          <label className="flex flex-col gap-2" htmlFor="demo-reset-token">
+          {hasGeminiFallbackKey && !requiresResetToken ? (
+            <div className="rounded-md border border-[color-mix(in_srgb,var(--state-success)_45%,var(--border-default))] bg-[color-mix(in_srgb,var(--state-success)_7%,transparent)] px-3 py-2.5 text-sm leading-5 text-[var(--text-primary)]">
+              Your session Gemini key can authorize this reset when the Worker
+              is not using its configured Gemini key.
+            </div>
+          ) : (
+            <label className="flex flex-col gap-2" htmlFor="demo-reset-token">
             <span className="font-mono text-[11px] uppercase tracking-[0.1em] text-[var(--text-muted)]">
               Demo reset key
             </span>
@@ -128,7 +138,8 @@ function ResetDemoDialog() {
               aria-invalid={resetError ? true : undefined}
               autoFocus
             />
-          </label>
+            </label>
+          )}
 
           {resetError ? (
             <p
