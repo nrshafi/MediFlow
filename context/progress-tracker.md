@@ -12,6 +12,8 @@ Update this file after every meaningful implementation change.
 
 ## Completed
 
+- 2026-07-16 - Refreshed all five judge-walkthrough captures against the current frontend and production API, selected a stronger patient-guidance example, captured the actionable Doctor controls and completed-day status, expanded the final-impact frame to include comparison charts, synchronized the talk track, and restored the shared demo to minute zero
+
 - 2026-07-16 - Added 10× client-side simulation playback alongside 1× and 4× while preserving one-minute API ticks
 
 - 2026-07-16 - Added a read-only Gemini model check before a user-provided key enters React memory, surfaced inline verification failures, re-verified session keys before the demo-reset authorization exception, and added success, invalid-key, transient-failure, and reset-authorization coverage
@@ -99,6 +101,8 @@ Update this file after every meaningful implementation change.
 - **Tailwind CSS + shadcn/ui** as the component layer *(decided 2026-07-14)*
 
 ## Session Notes
+
+- 2026-07-16: Judge storyboard captures now reflect the session-key control, P-006's four-minute consultation guidance, the Doctor view's patient-guidance and next-queue actions, and the Staff view's completed-day badge. The final frame includes the KPI strip and comparison charts; production demo data was reset to minute zero after capture.
 
 - 2026-07-16: The top-bar speed control now cycles 1× → 4× → 10× → 1×. Faster playback changes only client request cadence; each backend request still advances exactly one simulated minute.
 

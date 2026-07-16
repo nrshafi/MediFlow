@@ -25,9 +25,9 @@ should control playback during the demo.
 | 0:25 | Start 4x playback. Point to arrivals, Busy/Available states, queues, and changing wait estimates. | "Every simulated minute is persisted. As patients arrive or finish a stage, MediFlow recalculates the best next step across doctors, laboratory, X-ray, and ECG." |
 | 0:55 | Point to the patient table and resource cards. | "Urgent patients move ahead in waiting queues without interrupting care already in progress. Equal-priority patients remain FIFO, and every recommendation is auditable." |
 | 1:20 | Switch to Patient. Select an active patient if needed. | "The patient sees one plain-language instruction, an estimated wait, time remaining, and their progress through the visit. The frontend renders the engine's decision; it does not recompute it." |
-| 1:55 | Switch to Doctor. Select the current consultation. | "Before consultation, Gemini converts the simulated record into six readable sections. Allergies and abnormal results remain visibly emphasized, and the underlying structured record stays on screen." |
+| 1:55 | Switch to Doctor. Select the current consultation and point to the guidance and next-queue controls. | "Before consultation, Gemini converts the simulated record into six readable sections. Allergies and abnormal results remain visibly emphasized, and the underlying structured record stays on screen. The controls navigate the shared patient flow without changing the scheduler's persisted decisions." |
 | 2:35 | Return to Staff while playback continues. | "The same polling snapshot powers all three roles. Staff can see queue pressure and bottleneck alerts while the deterministic engine balances interchangeable consultation capacity." |
-| 3:25 | When playback stops at 30 completed, point across the five KPI cards. | "All 30 patients completed. Average wait fell from 10 to 2 minutes, visit duration from 32 to 25, average queue depth from 1.2 to 0.3, and peak queue depth from 5 to 2, while utilization rose from 45 to 46.5 percent." |
+| 3:25 | When playback stops at 30 completed, point across the KPI cards and comparison chart. | "All 30 patients completed. Average wait fell from 10 to 2 minutes, visit duration from 32 to 25, average queue depth from 1.2 to 0.3, and peak queue depth from 5 to 2, while utilization rose from 45 to 46.5 percent." |
 | 3:55 | End on the guardrail and completed count. | "This proves the coordination gain without an ML scheduler, real patient data, or replacing the hospital's existing systems." |
 
 ## Rehearsal record
@@ -44,14 +44,15 @@ the deterministic run completed at minute 240 with all 30 patients finished.
 | Average queue depth | 0.3 | 1.2 | 75% lower |
 | Peak queue depth | 2 | 5 | 60% lower |
 
-The captured production storyboard is in
+The storyboard was refreshed on 2026-07-16 against the current frontend and
+production API, then the shared demo was restored to minute zero. It is in
 [`artifacts/judge-walkthrough/`](../artifacts/judge-walkthrough/):
 
 1. `01-reset-staff.png` — canonical 9:00 AM opening state
 2. `02-live-staff.png` — live resource and patient flow at 10:00 AM
-3. `03-patient-guidance.png` — active patient's plain-language next step
-4. `04-doctor-brief.png` — live Gemini brief with clinical emphasis
-5. `05-final-impact.png` — 30/30 completion and final impact metrics
+3. `03-patient-guidance.png` — P-006's plain-language four-minute consultation guidance
+4. `04-doctor-brief.png` — live Gemini brief, clinical emphasis, and actionable navigation controls
+5. `05-final-impact.png` — 30/30 completion, day-complete status, KPIs, and comparison charts
 
 ## Recovery cues
 
