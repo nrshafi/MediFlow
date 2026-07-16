@@ -1,5 +1,6 @@
 import type {
   ApiSuccess,
+  GeminiApiKeyVerificationResult,
   OperationsSnapshot,
   SimulationResetResult,
   SimState,
@@ -23,7 +24,7 @@ interface SimContextValue {
   hasGeminiFallbackKey: boolean;
   play: () => void;
   pause: () => void;
-  setGeminiFallbackKey: (apiKey: string) => void;
+  verifyGeminiFallbackKey: (apiKey: string) => Promise<void>;
   clearGeminiFallbackKey: () => void;
   geminiRequestHeaders: () => Record<string, string>;
   resetDemo: (resetToken?: string) => Promise<void>;
@@ -89,8 +90,17 @@ export function SimProvider({ children }: { children: ReactNode }) {
   const [geminiFallbackKey, setGeminiFallbackKeyState] = useState("");
   const tickInFlight = useRef<Promise<void> | null>(null);
 
-  const setGeminiFallbackKey = useCallback((apiKey: string) => {
-    setGeminiFallbackKeyState(apiKey.trim());
+  const verifyGeminiFallbackKey = useCallback(async (apiKey: string) => {
+    const normalizedKey = apiKey.trim();
+    const response = await fetch(apiUrl("/api/llm/verify-key"), {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        [GEMINI_API_KEY_HEADER]: normalizedKey,
+      },
+    });
+    await readJson<GeminiApiKeyVerificationResult>(response);
+    setGeminiFallbackKeyState(normalizedKey);
   }, []);
   const clearGeminiFallbackKey = useCallback(() => {
     setGeminiFallbackKeyState("");
@@ -222,7 +232,7 @@ export function SimProvider({ children }: { children: ReactNode }) {
       hasGeminiFallbackKey: Boolean(geminiFallbackKey),
       play,
       pause,
-      setGeminiFallbackKey,
+      verifyGeminiFallbackKey,
       clearGeminiFallbackKey,
       geminiRequestHeaders,
       resetDemo,
@@ -239,10 +249,10 @@ export function SimProvider({ children }: { children: ReactNode }) {
       play,
       refresh,
       resetDemo,
-      setGeminiFallbackKey,
       state,
       stepNext,
       toggleSpeed,
+      verifyGeminiFallbackKey,
     ],
   );
 

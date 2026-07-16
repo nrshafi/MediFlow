@@ -4,13 +4,15 @@ Update this file after every meaningful implementation change.
 
 ## Current Phase
 
-- Phase 10 complete — session Gemini credential fallback
+- Phase 11 complete — session Gemini credential verification
 
 ## Current Goal
 
-- Gemini explanations remain available during a demo when the Worker secret is not configured
+- User-provided Gemini credentials are accepted only after Gemini verifies them
 
 ## Completed
+
+- 2026-07-16 - Added a read-only Gemini model check before a user-provided key enters React memory, surfaced inline verification failures, re-verified session keys before the demo-reset authorization exception, and added success, invalid-key, transient-failure, and reset-authorization coverage
 
 - 2026-07-16 - Allowed a user-provided session Gemini key to authorize demo reset without the separate reset key only when no configured Worker Gemini key is active; kept reset-token protection when the Worker key takes precedence and added UI fallback plus backend coverage
 
@@ -74,7 +76,7 @@ Update this file after every meaningful implementation change.
 
 ## Architecture Decisions
 
-- **Session-only Gemini key fallback** — an explicitly entered key is kept only in React memory and sent via `X-Gemini-Api-Key` on Gemini-capable requests; the Worker validates but never stores or logs it, and a configured `GEMINI_API_KEY` always takes precedence *(implemented 2026-07-15)*
+- **Verified session-only Gemini key fallback** — an explicitly entered key is checked through Gemini's read-only model endpoint before it enters React memory, kept only in memory, and sent via `X-Gemini-Api-Key` on Gemini-capable requests; the Worker never stores or logs it, re-verifies it before session-key reset authorization, and a configured `GEMINI_API_KEY` always takes precedence *(implemented 2026-07-16)*
 
 - **Binary non-preemptive priority semantics** — urgent patients precede normal patients in each resource queue; equal-priority patients use FIFO with patient ID as the final deterministic tie-breaker. Active services are never interrupted *(decided 2026-07-15)*
 - **Fixed-order FIFO baseline** — the identical fixture uses lab → X-ray → ECG → consultation, skips unneeded services, and applies naive FIFO without priority or reordering *(implemented 2026-07-15)*
@@ -95,6 +97,8 @@ Update this file after every meaningful implementation change.
 - **Tailwind CSS + shadcn/ui** as the component layer *(decided 2026-07-14)*
 
 ## Session Notes
+
+- 2026-07-16: User-provided Gemini keys now pass a small `models.get` request for the configured model before MediFlow marks them ready. Invalid or currently unusable keys remain outside session state, and reset independently repeats the check before treating a session key as authorization.
 
 - 2026-07-16: Staff reset now first uses the in-memory session Gemini key when the Worker has no configured Gemini key. If that exception is unavailable, the reset dialog requests the dedicated reset credential and the existing bearer-token path remains authoritative.
 

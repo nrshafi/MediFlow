@@ -8,6 +8,7 @@ import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { createOperationsHandler } from "./routes/operations";
 import { createDoctorBriefHandler } from "./routes/llm";
+import { createGeminiApiKeyVerificationHandler } from "./routes/gemini-key";
 import { createResetHandler } from "./routes/reset";
 import {
   createSimulationHandlers,
@@ -19,13 +20,17 @@ import {
   SimulationInvariantError,
   SimulationNotInitializedError,
 } from "./simulation/clock";
-import { InvalidGeminiApiKeyError } from "./llm/api-key";
+import {
+  GeminiApiKeyVerificationUnavailableError,
+  InvalidGeminiApiKeyError,
+} from "./llm/api-key";
 
 export function createApp(databaseFactory?: DatabaseFactory) {
   const app = new Hono<AppEnvironment>();
   const simulation = createSimulationHandlers(databaseFactory);
   const operations = createOperationsHandler(databaseFactory);
   const doctorBrief = createDoctorBriefHandler(databaseFactory);
+  const verifyGeminiApiKey = createGeminiApiKeyVerificationHandler();
   const reset = createResetHandler(databaseFactory);
 
   app.use(
@@ -48,6 +53,7 @@ export function createApp(databaseFactory?: DatabaseFactory) {
   app.post("/api/simulation/tick", simulation.tick);
   app.post("/api/simulation/reset", reset);
   app.get("/api/operations", operations);
+  app.post("/api/llm/verify-key", verifyGeminiApiKey);
   app.get("/api/patients/:patientId/brief", doctorBrief);
 
   app.notFound((context) => {
@@ -81,6 +87,15 @@ export function createApp(databaseFactory?: DatabaseFactory) {
         error: { code: "INVALID_GEMINI_API_KEY", message: error.message },
       };
       return context.json(response, 400);
+    }
+    if (error instanceof GeminiApiKeyVerificationUnavailableError) {
+      const response: ApiError = {
+        error: {
+          code: "GEMINI_API_KEY_VERIFICATION_UNAVAILABLE",
+          message: error.message,
+        },
+      };
+      return context.json(response, 503);
     }
 
     if (error instanceof SimulationInvariantError) {

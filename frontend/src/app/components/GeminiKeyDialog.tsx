@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Check, KeyRound, Trash2 } from "lucide-react";
+import { Check, KeyRound, LoaderCircle, Trash2 } from "lucide-react";
 import { MAX_GEMINI_API_KEY_LENGTH } from "@mediflow/shared";
 import { useSim } from "../store/SimContext";
 import {
@@ -21,13 +21,15 @@ export function GeminiKeyDialog() {
   const {
     clearGeminiFallbackKey,
     hasGeminiFallbackKey,
-    setGeminiFallbackKey,
+    verifyGeminiFallbackKey,
   } = useSim();
   const [open, setOpen] = useState(false);
   const [apiKey, setApiKey] = useState("");
   const [validationError, setValidationError] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
 
   const handleOpenChange = (nextOpen: boolean) => {
+    if (submitting) return;
     setOpen(nextOpen);
     if (!nextOpen) {
       setApiKey("");
@@ -35,15 +37,29 @@ export function GeminiKeyDialog() {
     }
   };
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    if (submitting) return;
     const normalizedKey = apiKey.trim();
     if (!normalizedKey) {
       setValidationError("Paste a Gemini API key to continue.");
       return;
     }
-    setGeminiFallbackKey(normalizedKey);
-    handleOpenChange(false);
+    setSubmitting(true);
+    setValidationError(null);
+    try {
+      await verifyGeminiFallbackKey(normalizedKey);
+      setOpen(false);
+      setApiKey("");
+    } catch (requestError) {
+      setValidationError(
+        requestError instanceof Error
+          ? requestError.message
+          : "Unable to verify the Gemini API key",
+      );
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const handleClear = () => {
@@ -81,7 +97,9 @@ export function GeminiKeyDialog() {
           </DialogTrigger>
         </TooltipTrigger>
         <TooltipContent>
-          {hasGeminiFallbackKey ? "Session Gemini key added" : "Add Gemini key"}
+          {hasGeminiFallbackKey
+            ? "Session Gemini key verified"
+            : "Add Gemini key"}
         </TooltipContent>
       </Tooltip>
 
@@ -95,9 +113,9 @@ export function GeminiKeyDialog() {
               Gemini API key
             </DialogTitle>
             <DialogDescription className="leading-6 text-[var(--text-muted)]">
-              Used only when the Worker has no configured Gemini key. It stays
-              in this tab&apos;s memory, is sent only to MediFlow over HTTPS, and
-              is cleared when the page reloads.
+              MediFlow verifies the key with Gemini first. After verification,
+              it is used only when the Worker has no configured Gemini key,
+              stays in this tab&apos;s memory, and clears when the page reloads.
             </DialogDescription>
           </DialogHeader>
 
@@ -108,7 +126,7 @@ export function GeminiKeyDialog() {
                 aria-hidden="true"
               />
               <span className="text-sm text-[var(--text-primary)]">
-                A session fallback key is ready.
+                A verified session fallback key is ready.
               </span>
             </div>
           ) : null}
@@ -133,6 +151,7 @@ export function GeminiKeyDialog() {
               placeholder="Paste a Gemini API key…"
               aria-describedby={validationError ? "gemini-api-key-error" : undefined}
               aria-invalid={validationError ? true : undefined}
+              disabled={submitting}
               autoFocus
             />
           </label>
@@ -157,6 +176,7 @@ export function GeminiKeyDialog() {
               <button
                 type="button"
                 onClick={handleClear}
+                disabled={submitting}
                 className="inline-flex h-10 items-center justify-center gap-2 rounded-md border border-[var(--border-default)] px-4 text-sm text-[var(--state-error)] transition-colors hover:bg-[var(--bg-surface)]"
               >
                 <Trash2 className="size-4" aria-hidden="true" />
@@ -167,10 +187,19 @@ export function GeminiKeyDialog() {
             )}
             <button
               type="submit"
-              className="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-[var(--accent-primary)] px-4 font-mono text-[11px] uppercase tracking-[0.08em] text-[var(--bg-base)] transition-[filter] hover:brightness-110"
+              disabled={submitting}
+              className="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-[var(--accent-primary)] px-4 font-mono text-[11px] uppercase tracking-[0.08em] text-[var(--bg-base)] transition-[filter] hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"
             >
-              <KeyRound className="size-4" aria-hidden="true" />
-              {hasGeminiFallbackKey ? "Replace key" : "Use this key"}
+              {submitting ? (
+                <LoaderCircle className="size-4 animate-spin" aria-hidden="true" />
+              ) : (
+                <KeyRound className="size-4" aria-hidden="true" />
+              )}
+              {submitting
+                ? "Verifying"
+                : hasGeminiFallbackKey
+                  ? "Replace key"
+                  : "Verify key"}
             </button>
           </DialogFooter>
         </form>

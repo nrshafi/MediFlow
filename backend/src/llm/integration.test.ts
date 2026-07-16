@@ -16,6 +16,95 @@ const migrationsFolder = fileURLToPath(
   new URL("../../drizzle", import.meta.url),
 );
 
+test("a user-provided Gemini key is verified against the configured model", async () => {
+  const originalFetch = globalThis.fetch;
+  let verificationCalls = 0;
+  globalThis.fetch = async (input, init) => {
+    verificationCalls += 1;
+    assert.equal(
+      String(input),
+      "https://generativelanguage.googleapis.com/v1beta/models/test-model",
+    );
+    assert.equal(
+      new Headers(init?.headers).get("x-goog-api-key"),
+      "valid-session-key",
+    );
+    return new Response(JSON.stringify({ name: "models/test-model" }), {
+      status: 200,
+      headers: { "Content-Type": "application/json" },
+    });
+  };
+  try {
+    const app = createApp();
+    const response = await app.request(
+      "/api/llm/verify-key",
+      {
+        method: "POST",
+        headers: { [GEMINI_API_KEY_HEADER]: "valid-session-key" },
+      },
+      { GEMINI_MODEL: "test-model" },
+    );
+
+    assert.equal(response.status, 200);
+    assert.deepEqual(await response.json(), { data: { verified: true } });
+    assert.equal(verificationCalls, 1);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test("Gemini rejects an incorrect user-provided key", async () => {
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = async () => new Response(null, { status: 400 });
+  try {
+    const app = createApp();
+    const response = await app.request(
+      "/api/llm/verify-key",
+      {
+        method: "POST",
+        headers: { [GEMINI_API_KEY_HEADER]: "incorrect-session-key" },
+      },
+      {},
+    );
+
+    assert.equal(response.status, 400);
+    assert.deepEqual(await response.json(), {
+      error: {
+        code: "INVALID_GEMINI_API_KEY",
+        message: "The provided Gemini API key is invalid",
+      },
+    });
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test("temporary Gemini verification failures do not accept a key", async () => {
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = async () => new Response(null, { status: 429 });
+  try {
+    const app = createApp();
+    const response = await app.request(
+      "/api/llm/verify-key",
+      {
+        method: "POST",
+        headers: { [GEMINI_API_KEY_HEADER]: "quota-limited-session-key" },
+      },
+      {},
+    );
+
+    assert.equal(response.status, 503);
+    assert.deepEqual(await response.json(), {
+      error: {
+        code: "GEMINI_API_KEY_VERIFICATION_UNAVAILABLE",
+        message: "Gemini could not verify this API key right now",
+      },
+    });
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
 test("tick generation uses and caches a request Gemini key when the Worker key is unavailable", async () => {
   const client = createClient({ url: "file::memory:" });
   const database: Database = drizzle(client, { schema });

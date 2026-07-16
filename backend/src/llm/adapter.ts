@@ -1,5 +1,5 @@
 import type { Bindings } from "../env";
-import { resolveGeminiApiKey } from "./api-key";
+import { resolveGeminiApiKey, resolveGeminiModel } from "./api-key";
 
 export interface LanguageModel {
   readonly provider: string;
@@ -70,6 +70,6 @@ export function createLanguageModel(
   if (!apiKey) return null;
   return new GeminiLanguageModel(
     apiKey,
-    bindings.GEMINI_MODEL?.trim() || "gemini-3.1-flash-lite",
+    resolveGeminiModel(bindings),
   );
 }

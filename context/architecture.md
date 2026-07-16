@@ -73,6 +73,8 @@ The optional demo-reset credential lives in the `DEMO_RESET_TOKEN` Worker secret
 
 If `GEMINI_API_KEY` is unavailable in the Worker environment, a user may explicitly provide a Gemini API key as a session-only fallback. The frontend keeps this key only in React memory, never writes it to local/session storage, and sends it over HTTPS only on requests that can invoke Gemini. The backend validates the bounded header value at the request boundary, never logs or persists it, and always prefers the configured Worker secret when both keys are present. Closing or reloading the page clears the user-provided key.
 
+Before the frontend retains a user-provided key, the Worker verifies it directly with Gemini against the configured model through the provider's read-only model endpoint. Invalid or currently unusable keys remain outside React state and receive a generic error that never echoes provider credentials or response bodies. Because client-side verification is not an authorization boundary, a session key used for the demo-reset exception is verified again by the Worker immediately before reset access is granted.
+
 ## Invariants
 
 1. **The LLM never makes a scheduling or clinical decision.** It only explains decisions already made by the deterministic engine and summarizes patient records. Removing the LLM must leave scheduling behavior unchanged.

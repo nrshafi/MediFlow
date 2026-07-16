@@ -132,6 +132,19 @@ test("authorized demo reset restores the canonical minute-zero fixture", async (
 test("a session Gemini key can reset when no Worker Gemini key is configured", async () => {
   const client = createClient({ url: "file::memory:" });
   const database: Database = drizzle(client, { schema });
+  const originalFetch = globalThis.fetch;
+  let verificationCalls = 0;
+  globalThis.fetch = async (_input, init) => {
+    verificationCalls += 1;
+    assert.equal(
+      new Headers(init?.headers).get("x-goog-api-key"),
+      "session-gemini-key",
+    );
+    return new Response(JSON.stringify({ name: "models/test-model" }), {
+      status: 200,
+      headers: { "Content-Type": "application/json" },
+    });
+  };
 
   try {
     await migrate(database, { migrationsFolder });
@@ -145,12 +158,49 @@ test("a session Gemini key can reset when no Worker Gemini key is configured", a
         method: "POST",
         headers: { [GEMINI_API_KEY_HEADER]: "session-gemini-key" },
       },
-      {},
+      { GEMINI_MODEL: "test-model" },
     );
 
     assert.equal(response.status, 200);
+    assert.equal(verificationCalls, 1);
     assert.equal((await getSimulationStatus(database)).minute, 0);
   } finally {
+    globalThis.fetch = originalFetch;
+    client.close();
+  }
+});
+
+test("an incorrect session Gemini key cannot authorize demo reset", async () => {
+  const client = createClient({ url: "file::memory:" });
+  const database: Database = drizzle(client, { schema });
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = async () => new Response(null, { status: 403 });
+
+  try {
+    await migrate(database, { migrationsFolder });
+    await resetAndSeedDatabase(database);
+    await advanceSimulation(database);
+    const app = createApp(() => database);
+
+    const response = await app.request(
+      "/api/simulation/reset",
+      {
+        method: "POST",
+        headers: { [GEMINI_API_KEY_HEADER]: "incorrect-session-key" },
+      },
+      {},
+    );
+
+    assert.equal(response.status, 400);
+    assert.deepEqual(await response.json(), {
+      error: {
+        code: "INVALID_GEMINI_API_KEY",
+        message: "The provided Gemini API key is invalid",
+      },
+    });
+    assert.equal((await getSimulationStatus(database)).minute, 1);
+  } finally {
+    globalThis.fetch = originalFetch;
     client.close();
   }
 });

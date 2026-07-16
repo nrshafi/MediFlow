@@ -70,3 +70,7 @@ export interface DoctorBriefResult {
   content: string;
   generatedBy: "gemini" | "fallback";
 }
+
+export interface GeminiApiKeyVerificationResult {
+  verified: true;
+}

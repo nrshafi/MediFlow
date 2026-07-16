@@ -7,7 +7,11 @@ import { GEMINI_API_KEY_HEADER } from "@mediflow/shared";
 import type { Handler } from "hono";
 import { createDatabase } from "../db/client";
 import { resetAndSeedDatabase } from "../db/seed";
-import { parseGeminiFallbackApiKey } from "../llm/api-key";
+import {
+  parseGeminiFallbackApiKey,
+  resolveGeminiModel,
+  verifyGeminiApiKey,
+} from "../llm/api-key";
 import { getSimulationStatus } from "../simulation/clock";
 import type { AppEnvironment, DatabaseFactory } from "./simulation";
 
@@ -55,14 +59,26 @@ export function createResetHandler(
 ): Handler<AppEnvironment> {
   return async (context) => {
     const expectedToken = context.env.DEMO_RESET_TOKEN?.trim();
+    const suppliedToken = bearerToken(context.req.header("Authorization"));
+    const hasResetTokenAccess = Boolean(
+      expectedToken &&
+        suppliedToken &&
+        (await tokensMatch(suppliedToken, expectedToken)),
+    );
     const workerGeminiKeyConfigured = Boolean(
       context.env.GEMINI_API_KEY?.trim(),
     );
-    const sessionGeminiKey = workerGeminiKeyConfigured
+    const sessionGeminiKey = workerGeminiKeyConfigured || hasResetTokenAccess
       ? undefined
       : parseGeminiFallbackApiKey(
           context.req.header(GEMINI_API_KEY_HEADER),
         );
+    if (sessionGeminiKey) {
+      await verifyGeminiApiKey(
+        sessionGeminiKey,
+        resolveGeminiModel(context.env),
+      );
+    }
     const hasSessionGeminiAccess = Boolean(sessionGeminiKey);
 
     if (!expectedToken && !hasSessionGeminiAccess) {
@@ -75,12 +91,6 @@ export function createResetHandler(
       return context.json(response, 503);
     }
 
-    const suppliedToken = bearerToken(context.req.header("Authorization"));
-    const hasResetTokenAccess = Boolean(
-      expectedToken &&
-        suppliedToken &&
-        (await tokensMatch(suppliedToken, expectedToken)),
-    );
     if (!hasSessionGeminiAccess && !hasResetTokenAccess) {
       const response: ApiError = {
         error: {

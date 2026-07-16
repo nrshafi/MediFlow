@@ -44,6 +44,7 @@ export type {
   ApiErrorDetail,
   ApiSuccess,
   DoctorBriefResult,
+  GeminiApiKeyVerificationResult,
   HealthStatus,
   OperationsSnapshot,
   SimulationStatus,
