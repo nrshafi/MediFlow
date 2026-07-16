@@ -11,14 +11,13 @@ import { resetAndSeedDatabase, SEEDED_PATIENT_COUNT } from "../db/seed";
 import { patients, simulationEvents } from "../db/schema";
 import * as schema from "../db/schema";
 import { advanceSimulation, getSimulationStatus } from "../simulation/clock";
-import { GEMINI_API_KEY_HEADER } from "@mediflow/shared";
 
 const migrationsFolder = fileURLToPath(
   new URL("../../drizzle", import.meta.url),
 );
 const resetToken = "test-only-demo-reset-token";
 
-test("demo reset rejects disabled and invalid credentials", async () => {
+test("demo reset ignores Gemini keys and rejects disabled or invalid reset credentials", async () => {
   const client = createClient({ url: "file::memory:" });
   const database: Database = drizzle(client, { schema });
 
@@ -40,6 +39,17 @@ test("demo reset rejects disabled and invalid credentials", async () => {
         message: "Demo reset is not configured",
       },
     });
+
+    const geminiKeyResponse = await app.request(
+      "/api/simulation/reset",
+      {
+        method: "POST",
+        headers: { "X-Gemini-Api-Key": "session-gemini-key" },
+      },
+      {},
+    );
+    assert.equal(geminiKeyResponse.status, 503);
+    assert.equal((await getSimulationStatus(database)).minute, 1);
 
     const unauthorizedResponse = await app.request(
       "/api/simulation/reset",
@@ -110,7 +120,7 @@ test("authorized demo reset restores the canonical minute-zero fixture", async (
         headers: {
           Origin: "https://mediflow.example",
           "Access-Control-Request-Method": "POST",
-          "Access-Control-Request-Headers": `Authorization, ${GEMINI_API_KEY_HEADER}`,
+          "Access-Control-Request-Headers": "Authorization",
         },
       },
       { DEMO_RESET_TOKEN: resetToken },
@@ -120,115 +130,6 @@ test("authorized demo reset restores the canonical minute-zero fixture", async (
       preflightResponse.headers.get("Access-Control-Allow-Headers") ?? "",
       /Authorization/i,
     );
-    assert.match(
-      preflightResponse.headers.get("Access-Control-Allow-Headers") ?? "",
-      new RegExp(GEMINI_API_KEY_HEADER, "i"),
-    );
-  } finally {
-    client.close();
-  }
-});
-
-test("a session Gemini key can reset when no Worker Gemini key is configured", async () => {
-  const client = createClient({ url: "file::memory:" });
-  const database: Database = drizzle(client, { schema });
-  const originalFetch = globalThis.fetch;
-  let verificationCalls = 0;
-  globalThis.fetch = async (_input, init) => {
-    verificationCalls += 1;
-    assert.equal(
-      new Headers(init?.headers).get("x-goog-api-key"),
-      "session-gemini-key",
-    );
-    return new Response(JSON.stringify({ name: "models/test-model" }), {
-      status: 200,
-      headers: { "Content-Type": "application/json" },
-    });
-  };
-
-  try {
-    await migrate(database, { migrationsFolder });
-    await resetAndSeedDatabase(database);
-    await advanceSimulation(database);
-    const app = createApp(() => database);
-
-    const response = await app.request(
-      "/api/simulation/reset",
-      {
-        method: "POST",
-        headers: { [GEMINI_API_KEY_HEADER]: "session-gemini-key" },
-      },
-      { GEMINI_MODEL: "test-model" },
-    );
-
-    assert.equal(response.status, 200);
-    assert.equal(verificationCalls, 1);
-    assert.equal((await getSimulationStatus(database)).minute, 0);
-  } finally {
-    globalThis.fetch = originalFetch;
-    client.close();
-  }
-});
-
-test("an incorrect session Gemini key cannot authorize demo reset", async () => {
-  const client = createClient({ url: "file::memory:" });
-  const database: Database = drizzle(client, { schema });
-  const originalFetch = globalThis.fetch;
-  globalThis.fetch = async () => new Response(null, { status: 403 });
-
-  try {
-    await migrate(database, { migrationsFolder });
-    await resetAndSeedDatabase(database);
-    await advanceSimulation(database);
-    const app = createApp(() => database);
-
-    const response = await app.request(
-      "/api/simulation/reset",
-      {
-        method: "POST",
-        headers: { [GEMINI_API_KEY_HEADER]: "incorrect-session-key" },
-      },
-      {},
-    );
-
-    assert.equal(response.status, 400);
-    assert.deepEqual(await response.json(), {
-      error: {
-        code: "INVALID_GEMINI_API_KEY",
-        message: "The provided Gemini API key is invalid",
-      },
-    });
-    assert.equal((await getSimulationStatus(database)).minute, 1);
-  } finally {
-    globalThis.fetch = originalFetch;
-    client.close();
-  }
-});
-
-test("a session Gemini key cannot bypass reset protection when the Worker Gemini key is configured", async () => {
-  const client = createClient({ url: "file::memory:" });
-  const database: Database = drizzle(client, { schema });
-
-  try {
-    await migrate(database, { migrationsFolder });
-    await resetAndSeedDatabase(database);
-    await advanceSimulation(database);
-    const app = createApp(() => database);
-
-    const response = await app.request(
-      "/api/simulation/reset",
-      {
-        method: "POST",
-        headers: { [GEMINI_API_KEY_HEADER]: "session-gemini-key" },
-      },
-      {
-        DEMO_RESET_TOKEN: resetToken,
-        GEMINI_API_KEY: "worker-gemini-key",
-      },
-    );
-
-    assert.equal(response.status, 401);
-    assert.equal((await getSimulationStatus(database)).minute, 1);
   } finally {
     client.close();
   }

@@ -3,15 +3,9 @@ import type {
   ApiSuccess,
   SimulationResetResult,
 } from "@mediflow/shared";
-import { GEMINI_API_KEY_HEADER } from "@mediflow/shared";
 import type { Handler } from "hono";
 import { createDatabase } from "../db/client";
 import { resetAndSeedDatabase } from "../db/seed";
-import {
-  parseGeminiFallbackApiKey,
-  resolveGeminiModel,
-  verifyGeminiApiKey,
-} from "../llm/api-key";
 import { getSimulationStatus } from "../simulation/clock";
 import type { AppEnvironment, DatabaseFactory } from "./simulation";
 
@@ -65,23 +59,7 @@ export function createResetHandler(
         suppliedToken &&
         (await tokensMatch(suppliedToken, expectedToken)),
     );
-    const workerGeminiKeyConfigured = Boolean(
-      context.env.GEMINI_API_KEY?.trim(),
-    );
-    const sessionGeminiKey = workerGeminiKeyConfigured || hasResetTokenAccess
-      ? undefined
-      : parseGeminiFallbackApiKey(
-          context.req.header(GEMINI_API_KEY_HEADER),
-        );
-    if (sessionGeminiKey) {
-      await verifyGeminiApiKey(
-        sessionGeminiKey,
-        resolveGeminiModel(context.env),
-      );
-    }
-    const hasSessionGeminiAccess = Boolean(sessionGeminiKey);
-
-    if (!expectedToken && !hasSessionGeminiAccess) {
+    if (!expectedToken) {
       const response: ApiError = {
         error: {
           code: "DEMO_RESET_DISABLED",
@@ -91,7 +69,7 @@ export function createResetHandler(
       return context.json(response, 503);
     }
 
-    if (!hasSessionGeminiAccess && !hasResetTokenAccess) {
+    if (!hasResetTokenAccess) {
       const response: ApiError = {
         error: {
           code: "DEMO_RESET_UNAUTHORIZED",

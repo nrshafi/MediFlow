@@ -43,9 +43,9 @@ The npm-workspace monorepo layout was implemented on 2026-07-15.
 
 ## Demo Reset Semantics
 
-- `POST /api/simulation/reset` is a simulated-data demonstration control, not a general administration API. It normally requires the Worker's `DEMO_RESET_TOKEN` as a bearer credential. When the Worker has no configured `GEMINI_API_KEY`, a validated session Gemini fallback header may authorize reset without the reset token; this exception is unavailable whenever the configured Worker Gemini key takes precedence.
+- `POST /api/simulation/reset` is a simulated-data demonstration control, not a general administration API. It requires the Worker's `DEMO_RESET_TOKEN` as a bearer credential.
 - A successful reset atomically replaces all simulated operational, history, event, metric, and cached LLM rows with the canonical deterministic fixture and returns the fresh minute-zero simulation state. It applies no migrations and accepts no caller-provided seed or patient data.
-- The frontend exposes reset only in the Staff view, asks for the reset credential at action time unless a session Gemini key can be tried, never bundles or persists either key, pauses local playback, and refreshes the shared snapshot after success. If the Worker rejects session-key authorization, the dialog falls back to requesting the reset credential.
+- The frontend exposes reset only in the Staff view, asks for the reset credential at action time, never bundles or persists it, pauses local playback, and refreshes the shared snapshot after success.
 - Reset invalidates the shared demo state for every connected viewer. This behavior is acceptable only for the simulated-data MVP and must be replaced by authenticated, tenant-scoped administration before any real-data integration.
 
 ## Scheduling Semantics
@@ -73,7 +73,7 @@ The optional demo-reset credential lives in the `DEMO_RESET_TOKEN` Worker secret
 
 If `GEMINI_API_KEY` is unavailable in the Worker environment, a user may explicitly provide a Gemini API key as a session-only fallback. The frontend keeps this key only in React memory, never writes it to local/session storage, and sends it over HTTPS only on requests that can invoke Gemini. The backend validates the bounded header value at the request boundary, never logs or persists it, and always prefers the configured Worker secret when both keys are present. Closing or reloading the page clears the user-provided key.
 
-Before the frontend retains a user-provided key, the Worker verifies it directly with Gemini against the configured model through the provider's read-only model endpoint. Invalid or currently unusable keys remain outside React state and receive a generic error that never echoes provider credentials or response bodies. Because client-side verification is not an authorization boundary, a session key used for the demo-reset exception is verified again by the Worker immediately before reset access is granted.
+Before the frontend retains a user-provided key, the Worker verifies it directly with Gemini against the configured model through the provider's read-only model endpoint. Invalid or currently unusable keys remain outside React state and receive a generic error that never echoes provider credentials or response bodies.
 
 ## Invariants
 

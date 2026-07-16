@@ -179,13 +179,12 @@ export function SimProvider({ children }: { children: ReactNode }) {
           ...(resetToken?.trim()
             ? { Authorization: `Bearer ${resetToken.trim()}` }
             : {}),
-          ...geminiRequestHeaders(),
         },
       });
       await readJson<SimulationResetResult>(response);
       await refresh();
     },
-    [geminiRequestHeaders, refresh],
+    [refresh],
   );
 
   useEffect(() => {

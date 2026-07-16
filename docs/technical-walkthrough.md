@@ -106,8 +106,7 @@ The implementation protects that boundary in four ways:
 The [AI features diagram](diagram/ai-features.mmd) makes the one-way boundary
 visible. For demos without a configured Worker key, a presenter may enter a
 Gemini key only after a read-only verification call. That key remains in
-browser memory for the session, is never stored, and is re-checked by the
-Worker when used for the narrowly scoped demo-reset exception.
+browser memory for the session and is never stored.
 
 ## Evidence shown in the demo
 
