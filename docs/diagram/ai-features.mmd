@@ -1,0 +1,22 @@
+flowchart LR
+    Facts[Persisted facts\npatient history, selected resource, ETA]
+    Engine[Deterministic scheduler\nselects route]
+    Prompt[Prompt builder]
+    Adapter[Provider-agnostic\nGemini adapter]
+    Text[Patient explanation\nor six-section doctor brief]
+    Cache[(Source-hash cache)]
+    Fallback[Deterministic fallback text]
+    UI[Patient and doctor views]
+
+    Engine -->|decision facts only| Facts
+    Facts --> Prompt
+    Prompt --> Adapter
+    Adapter -->|success| Text
+    Text --> Cache
+    Cache --> UI
+    Adapter -->|timeout or unavailable| Fallback
+    Fallback --> UI
+    UI -. never writes decisions .-> Engine
+
+    classDef protected fill:#0F2032,stroke:#E5C04B,color:#E9F2F8
+    class Engine protected

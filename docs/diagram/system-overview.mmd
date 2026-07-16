@@ -1,0 +1,29 @@
+flowchart LR
+    Staff[Staff dashboard]
+    Patient[Patient guidance]
+    Doctor[Doctor brief]
+    Frontend[React frontend\nshared polling context]
+    API[Hono API\nCloudflare Worker]
+    Scheduler[Pure deterministic\nscheduling engine]
+    Simulation[One-minute simulation\nclock and event planner]
+    DB[(Turso / libSQL\noperational state, events, metrics)]
+    LLM[Gemini via\nprovider adapter]
+    Cache[(Cached LLM output)]
+
+    Staff --> Frontend
+    Patient --> Frontend
+    Doctor --> Frontend
+    Frontend -->|GET operations, brief| API
+    Frontend -->|POST one-minute tick| API
+    API --> Simulation
+    Simulation --> Scheduler
+    Simulation <--> DB
+    API <--> DB
+    API -->|facts only| LLM
+    LLM --> Cache
+    Cache --> API
+
+    classDef boundary fill:#0A1826,stroke:#22D3EE,color:#E9F2F8
+    classDef storage fill:#0F2032,stroke:#3BE8C8,color:#E9F2F8
+    class Frontend,API,Scheduler,Simulation boundary
+    class DB,Cache storage

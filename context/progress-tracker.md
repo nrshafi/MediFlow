@@ -12,6 +12,10 @@ Update this file after every meaningful implementation change.
 
 ## Completed
 
+- 2026-07-16 - Added `docs/calculations.md`, documenting the deterministic routing formula, queue and wait rules, resource utilization and congestion thresholds, dashboard metric aggregation, baseline calculation, and the LLM's non-decision boundary
+
+- 2026-07-16 - Added `docs/technical-walkthrough.md` plus four Mermaid source diagrams under `docs/diagram/` covering the system, scheduler, patient state, and language-only AI boundary; documented the presentation narrative and a staged real-world overlay integration path
+
 - 2026-07-16 - Refreshed all five judge-walkthrough captures against the current frontend and production API, selected a stronger patient-guidance example, captured the actionable Doctor controls and completed-day status, expanded the final-impact frame to include comparison charts, synchronized the talk track, and restored the shared demo to minute zero
 
 - 2026-07-16 - Added 10× client-side simulation playback alongside 1× and 4× while preserving one-minute API ticks

@@ -1,0 +1,17 @@
+flowchart TD
+    Tick[POST /api/simulation/tick] --> Load[Load persisted state]
+    Load --> Clock[Plan minute + 1\nand record unique clock event]
+    Clock --> Complete[Complete due services\npatient-ID order]
+    Complete --> Arrive[Register due arrivals\npatient-ID order]
+    Arrive --> Eligible[Find registered, unfinished\npatients not active or queued]
+    Eligible --> Services[Evaluate each incomplete\nrequired service]
+    Services --> Project[Project work ahead + remaining\nvisit service time]
+    Project --> Choose[Choose lowest projected whole-visit finish\ntie-break: service position, resource ID]
+    Choose --> Queue[Place patient in one resource queue]
+    Queue --> Order[Sort each queue\nurgent → normal → FIFO → patient ID]
+    Order --> Start[Start head of each idle resource]
+    Start --> Persist[Atomically persist resource state,\nqueues, timeline, events, and metrics]
+    Persist --> Snapshot[GET /api/operations polling snapshot]
+
+    classDef decision fill:#0F2032,stroke:#E5C04B,color:#E9F2F8
+    class Project,Choose,Order decision

@@ -4,6 +4,10 @@ This is the rehearsed judge-facing path for the production demo at
 <https://mediflow-bc2.pages.dev/staff>. It takes about four minutes when the
 simulation runs at 4x speed.
 
+For the architecture, deterministic scheduling rules, AI safety boundary, and
+real-world integration plan behind this demo, see the
+[technical walkthrough](technical-walkthrough.md).
+
 ## Preflight
 
 1. Open the Staff view in a clean browser window at 1440 x 900 or larger.
