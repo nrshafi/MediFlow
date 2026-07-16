@@ -12,6 +12,8 @@ Update this file after every meaningful implementation change.
 
 ## Completed
 
+- 2026-07-16 - Completed the actionable-control audit: replaced the inert Doctor Brief consultation/skip controls with patient-guidance navigation and queue selection, deep-linked the Patient view to the selected patient, replaced permanently disabled completed-day playback controls with a status badge, made empty key forms return inline validation instead of gray submit buttons, and added keyboard/accessible labels to adjacent patient controls
+
 - 2026-07-15 - Added a session-only Gemini API key fallback: the top bar accepts and clears a key held only in React memory, sends it only on Gemini-capable requests, validates it at the Worker boundary, prefers the configured Worker secret, and never logs or persists the supplied key; added precedence, fallback, validation, and CORS coverage
 
 - 2026-07-15 - Rehearsed the judge-facing walkthrough end to end against production, captured the reset, live Staff, Patient, Doctor, and final-impact states, documented a four-minute talk track and recovery cues, verified 30/30 completion at minute 240, and restored the shared demo to minute zero
@@ -91,6 +93,8 @@ Update this file after every meaningful implementation change.
 - **Tailwind CSS + shadcn/ui** as the component layer *(decided 2026-07-14)*
 
 ## Session Notes
+
+- 2026-07-16: All visible application buttons now have observable behavior when available; unavailable completed-day playback actions are no longer rendered as disabled controls. Doctor actions preserve the deterministic scheduler boundary by navigating to patient guidance or selecting the next queued patient instead of pretending to start or skip clinical work client-side.
 
 - 2026-07-15: Session Gemini fallback completed. A header key can generate and cache recommendation explanations and doctor briefs only when the Worker secret is absent; reload clears the browser-held key. All 19 backend tests and strict workspace checks pass.
 

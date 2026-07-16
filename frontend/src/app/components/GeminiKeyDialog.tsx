@@ -25,16 +25,23 @@ export function GeminiKeyDialog() {
   } = useSim();
   const [open, setOpen] = useState(false);
   const [apiKey, setApiKey] = useState("");
+  const [validationError, setValidationError] = useState<string | null>(null);
 
   const handleOpenChange = (nextOpen: boolean) => {
     setOpen(nextOpen);
-    if (!nextOpen) setApiKey("");
+    if (!nextOpen) {
+      setApiKey("");
+      setValidationError(null);
+    }
   };
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const normalizedKey = apiKey.trim();
-    if (!normalizedKey) return;
+    if (!normalizedKey) {
+      setValidationError("Paste a Gemini API key to continue.");
+      return;
+    }
     setGeminiFallbackKey(normalizedKey);
     handleOpenChange(false);
   };
@@ -50,6 +57,7 @@ export function GeminiKeyDialog() {
         <TooltipTrigger asChild>
           <DialogTrigger asChild>
             <button
+              type="button"
               className="relative flex size-8 items-center justify-center rounded-md border border-[var(--border-default)] bg-[var(--bg-surface)] transition-colors hover:border-[var(--accent-primary)]"
               style={{
                 color: hasGeminiFallbackKey
@@ -117,12 +125,27 @@ export function GeminiKeyDialog() {
               spellCheck={false}
               maxLength={MAX_GEMINI_API_KEY_LENGTH}
               value={apiKey}
-              onChange={(event) => setApiKey(event.target.value)}
+              onChange={(event) => {
+                setApiKey(event.target.value);
+                if (event.target.value.trim()) setValidationError(null);
+              }}
               className="h-10 rounded-md border border-[var(--border-default)] bg-[var(--bg-surface)] px-3 font-mono text-sm text-[var(--text-primary)] outline-none placeholder:text-[var(--text-muted)] focus:border-[var(--accent-primary)]"
-              placeholder="Paste a Gemini API key"
+              placeholder="Paste a Gemini API key…"
+              aria-describedby={validationError ? "gemini-api-key-error" : undefined}
+              aria-invalid={validationError ? true : undefined}
               autoFocus
             />
           </label>
+
+          {validationError ? (
+            <p
+              id="gemini-api-key-error"
+              role="alert"
+              className="text-sm text-[var(--state-error)]"
+            >
+              {validationError}
+            </p>
+          ) : null}
 
           <div className="rounded-md border border-dashed border-[var(--state-warning)] px-3 py-2.5 text-xs leading-5 text-[var(--text-muted)]">
             The key never changes scheduling decisions and is not saved to
@@ -144,8 +167,7 @@ export function GeminiKeyDialog() {
             )}
             <button
               type="submit"
-              disabled={!apiKey.trim()}
-              className="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-[var(--accent-primary)] px-4 font-mono text-[11px] uppercase tracking-[0.08em] text-[var(--bg-base)] transition-opacity disabled:cursor-not-allowed disabled:opacity-40"
+              className="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-[var(--accent-primary)] px-4 font-mono text-[11px] uppercase tracking-[0.08em] text-[var(--bg-base)] transition-[filter] hover:brightness-110"
             >
               <KeyRound className="size-4" aria-hidden="true" />
               {hasGeminiFallbackKey ? "Replace key" : "Use this key"}

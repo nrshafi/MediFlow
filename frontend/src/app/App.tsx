@@ -23,7 +23,7 @@ const DoctorBrief = lazy(async () => {
 function ViewFallback() {
   return (
     <div className="flex min-h-[50vh] items-center justify-center text-sm text-[var(--text-muted)]">
-      Loading view...
+      Loading view…
     </div>
   );
 }
@@ -43,6 +43,7 @@ function ApiStatus() {
     >
       <span>Live API unavailable: {error}</span>
       <button
+        type="button"
         className="font-mono uppercase underline underline-offset-4"
         style={{ color: "var(--accent-primary)", fontSize: "11px" }}
         onClick={() => void refresh()}

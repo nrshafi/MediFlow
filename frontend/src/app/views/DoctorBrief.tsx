@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import type { ApiSuccess, DoctorBriefResult } from "@mediflow/shared";
-import { AlertTriangle } from "lucide-react";
+import { AlertTriangle, ArrowRight, UserRoundSearch } from "lucide-react";
+import { useNavigate } from "react-router";
 import { useSim, formatSimClock } from "../store/SimContext";
 import type { Patient } from "../lib/types";
 import { MicroLabel, MonoTag, Panel, PriorityChip, GuardrailNote } from "../components/primitives";
@@ -8,6 +9,7 @@ import { apiUrl } from "../lib/api";
 import { formatBriefContent } from "../lib/brief-format";
 
 export function DoctorBrief() {
+  const navigate = useNavigate();
   const { state, geminiRequestHeaders } = useSim();
   const { patients, resources } = state;
   const doctors = useMemo(
@@ -37,6 +39,12 @@ export function DoctorBrief() {
   }, [queue, selectedId]);
 
   const patient = queue.find((p) => p.id === selectedId) ?? queue[0] ?? null;
+  const selectNextPatient = () => {
+    if (!patient || queue.length < 2) return;
+    const currentIndex = queue.findIndex((queuedPatient) => queuedPatient.id === patient.id);
+    const nextPatient = queue[(currentIndex + 1) % queue.length];
+    if (nextPatient) setSelectedId(nextPatient.id);
+  };
   const [brief, setBrief] = useState<DoctorBriefResult | null>(null);
   useEffect(() => {
     if (!patient) {
@@ -78,8 +86,10 @@ export function DoctorBrief() {
               const isActive = d.id === doctorId;
               return (
                 <button
+                  type="button"
                   key={d.id}
                   onClick={() => { setDoctorId(d.id); setSelectedId(null); }}
+                  aria-pressed={isActive}
                   className="text-left rounded-md px-3 py-2 transition-colors"
                   style={{
                     border: "1px solid var(--border-default)",
@@ -104,8 +114,10 @@ export function DoctorBrief() {
                 const eta = i === 0 ? 0 : queue.slice(0, i).reduce((s, q) => s + q.estimatedConsultationDuration, 0);
                 return (
                   <button
+                    type="button"
                     key={p.id}
                     onClick={() => setSelectedId(p.id)}
+                    aria-pressed={isSel}
                     className="text-left rounded-xl p-3 transition-colors"
                     style={{
                       backgroundColor: "var(--bg-surface)",
@@ -131,7 +143,16 @@ export function DoctorBrief() {
         </aside>
 
         {/* Main brief */}
-        {patient ? <Brief patient={patient} minute={state.minute} brief={brief} /> : (
+        {patient ? (
+          <Brief
+            patient={patient}
+            minute={state.minute}
+            brief={brief}
+            hasNextPatient={queue.length > 1}
+            onSelectNext={selectNextPatient}
+            onViewGuidance={() => navigate(`/patient?patient=${encodeURIComponent(patient.id)}`)}
+          />
+        ) : (
           <Panel className="flex items-center justify-center" style={{ minHeight: 300 }}>
             <span style={{ color: "var(--text-muted)" }}>Select a patient to view their brief.</span>
           </Panel>
@@ -141,7 +162,21 @@ export function DoctorBrief() {
   );
 }
 
-function Brief({ patient, minute, brief }: { patient: Patient; minute: number; brief: DoctorBriefResult | null }) {
+function Brief({
+  patient,
+  minute,
+  brief,
+  hasNextPatient,
+  onSelectNext,
+  onViewGuidance,
+}: {
+  patient: Patient;
+  minute: number;
+  brief: DoctorBriefResult | null;
+  hasNextPatient: boolean;
+  onSelectNext: () => void;
+  onViewGuidance: () => void;
+}) {
   const h = patient.history;
   return (
     <section className="flex flex-col gap-4">
@@ -241,17 +276,25 @@ function Brief({ patient, minute, brief }: { patient: Patient; minute: number; b
       {/* Actions */}
       <div className="flex items-center gap-3 flex-wrap">
         <button
-          className="font-mono uppercase rounded-md px-5 h-10 flex items-center"
+          type="button"
+          onClick={onViewGuidance}
+          className="font-mono uppercase rounded-md px-5 h-10 flex items-center gap-2 transition-[filter] hover:brightness-110"
           style={{ fontSize: "12px", letterSpacing: "0.08em", backgroundColor: "var(--accent-primary)", color: "var(--bg-base)" }}
         >
-          START CONSULTATION
+          <UserRoundSearch className="size-4" aria-hidden="true" />
+          VIEW PATIENT GUIDANCE
         </button>
-        <button
-          className="font-mono uppercase rounded-md px-5 h-10 flex items-center"
-          style={{ fontSize: "12px", letterSpacing: "0.08em", border: "1px solid var(--border-default)", color: "var(--text-muted)", backgroundColor: "transparent" }}
-        >
-          SKIP / NEXT PATIENT
-        </button>
+        {hasNextPatient ? (
+          <button
+            type="button"
+            onClick={onSelectNext}
+            className="font-mono uppercase rounded-md px-5 h-10 flex items-center gap-2 transition-colors hover:bg-[var(--bg-raised)]"
+            style={{ fontSize: "12px", letterSpacing: "0.08em", border: "1px solid var(--border-default)", color: "var(--text-primary)", backgroundColor: "transparent" }}
+          >
+            NEXT QUEUE PATIENT
+            <ArrowRight className="size-4" aria-hidden="true" />
+          </button>
+        ) : null}
       </div>
 
       <div className="flex flex-col gap-2">

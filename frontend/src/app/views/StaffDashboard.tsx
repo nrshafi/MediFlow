@@ -133,15 +133,19 @@ export function StaffDashboard() {
             <div className="relative">
               <Search className="h-4 w-4 absolute left-2.5 top-1/2 -translate-y-1/2" style={{ color: "var(--text-muted)" }} />
               <input
+                name="patient-search"
+                type="search"
+                autoComplete="off"
+                aria-label="Search patients by name or token"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="Search name / token"
+                placeholder="Search name or token…"
                 className="font-mono rounded-md pl-8 pr-3 py-1.5"
                 style={{ fontSize: "12px", backgroundColor: "var(--bg-surface)", border: "1px solid var(--border-default)", color: "var(--text-primary)", width: 200 }}
               />
             </div>
             <Select value={stageFilter} onValueChange={setStageFilter}>
-              <SelectTrigger className="w-[160px] font-mono" style={{ fontSize: "12px", backgroundColor: "var(--bg-surface)", borderColor: "var(--border-default)" }}>
+              <SelectTrigger aria-label="Filter patients by stage" className="w-[160px] font-mono" style={{ fontSize: "12px", backgroundColor: "var(--bg-surface)", borderColor: "var(--border-default)" }}>
                 <SelectValue placeholder="Stage" />
               </SelectTrigger>
               <SelectContent>
@@ -175,6 +179,14 @@ export function StaffDashboard() {
                     <tr
                       key={p.id}
                       onClick={() => setSelected(p)}
+                      onKeyDown={(event) => {
+                        if (event.key === "Enter" || event.key === " ") {
+                          event.preventDefault();
+                          setSelected(p);
+                        }
+                      }}
+                      tabIndex={0}
+                      aria-label={`View ${p.name}'s patient flow details`}
                       className="cursor-pointer transition-colors hover:[background-color:var(--bg-raised)]"
                       style={{ borderBottom: "1px solid var(--border-default)" }}
                     >

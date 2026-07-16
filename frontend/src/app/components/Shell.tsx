@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router";
-import { LoaderCircle, Pause, Play, RotateCcw, StepForward } from "lucide-react";
+import { Check, LoaderCircle, Pause, Play, RotateCcw, StepForward } from "lucide-react";
 import { useSim, formatSimClock } from "../store/SimContext";
 import {
   Dialog,
@@ -37,7 +37,11 @@ function ResetDemoDialog() {
 
   const handleReset = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (!resetToken.trim() || submitting) return;
+    if (submitting) return;
+    if (!resetToken.trim()) {
+      setResetError("Enter the demo reset key to continue.");
+      return;
+    }
     setSubmitting(true);
     setResetError(null);
     try {
@@ -61,6 +65,7 @@ function ResetDemoDialog() {
         <TooltipTrigger asChild>
           <DialogTrigger asChild>
             <button
+              type="button"
               className="flex size-8 items-center justify-center rounded-md transition-colors"
               style={{
                 border: "1px solid var(--border-default)",
@@ -112,10 +117,13 @@ function ResetDemoDialog() {
               type="password"
               autoComplete="off"
               value={resetToken}
-              onChange={(event) => setResetToken(event.target.value)}
+              onChange={(event) => {
+                setResetToken(event.target.value);
+                if (event.target.value.trim()) setResetError(null);
+              }}
               disabled={submitting}
               className="h-10 rounded-md border border-[var(--border-default)] bg-[var(--bg-surface)] px-3 text-sm text-[var(--text-primary)] outline-none placeholder:text-[var(--text-muted)] focus:border-[var(--accent-primary)] disabled:cursor-not-allowed disabled:opacity-50"
-              placeholder="Enter the Worker secret"
+              placeholder="Enter the Worker secret…"
               aria-describedby={resetError ? "demo-reset-error" : undefined}
               aria-invalid={resetError ? true : undefined}
               autoFocus
@@ -143,7 +151,7 @@ function ResetDemoDialog() {
             </button>
             <button
               type="submit"
-              disabled={!resetToken.trim() || submitting}
+              disabled={submitting}
               className="inline-flex h-10 items-center justify-center gap-2 rounded-md border border-[var(--state-warning)] bg-[color-mix(in_srgb,var(--state-warning)_12%,transparent)] px-4 font-mono text-[11px] uppercase tracking-[0.08em] text-[var(--state-warning)] transition-colors hover:bg-[color-mix(in_srgb,var(--state-warning)_18%,transparent)] disabled:cursor-not-allowed disabled:opacity-40"
             >
               {submitting ? (
@@ -181,6 +189,7 @@ function RoleSwitcher() {
         const isActive = r.key === active;
         return (
           <button
+            type="button"
             key={r.key}
             role="tab"
             aria-selected={isActive}
@@ -221,37 +230,54 @@ function SimControls() {
     state.patients.length > 0 &&
     state.metrics.live.completed >= state.patients.length;
   const showReset = location.pathname.startsWith("/staff");
-  const btn = "flex size-8 items-center justify-center rounded-md transition-colors disabled:cursor-not-allowed disabled:opacity-40";
+  const btn = "flex size-8 items-center justify-center rounded-md transition-colors hover:border-[var(--accent-primary)]";
   const btnStyle = { border: "1px solid var(--border-default)", color: "var(--text-primary)", backgroundColor: "var(--bg-surface)" };
   return (
     <TooltipProvider delayDuration={200}>
       <div className="flex items-center gap-1.5">
         <GeminiKeyDialog />
-        <Tooltip>
+        {simulationComplete ? (
+          <span
+            className="font-mono inline-flex h-8 items-center gap-1.5 rounded-md px-2.5 uppercase"
+            style={{
+              border: "1px solid color-mix(in srgb, var(--state-success) 45%, var(--border-default))",
+              color: "var(--state-success)",
+              backgroundColor: "color-mix(in srgb, var(--state-success) 8%, transparent)",
+              fontSize: "11px",
+              letterSpacing: "0.08em",
+            }}
+            aria-live="polite"
+          >
+            <Check className="size-4" aria-hidden="true" />
+            Day complete
+          </span>
+        ) : null}
+        {!simulationComplete ? <Tooltip>
           <TooltipTrigger asChild>
-            <button className={btn} style={btnStyle} onClick={() => (state.playing ? pause() : play())} aria-label={state.playing ? "Pause simulation" : "Play simulation"} disabled={simulationComplete}>
-              {state.playing ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+            <button type="button" className={btn} style={btnStyle} onClick={() => (state.playing ? pause() : play())} aria-label={state.playing ? "Pause simulation" : "Play simulation"}>
+              {state.playing ? <Pause className="h-4 w-4" aria-hidden="true" /> : <Play className="h-4 w-4" aria-hidden="true" />}
             </button>
           </TooltipTrigger>
           <TooltipContent>{state.playing ? "Pause" : "Play"}</TooltipContent>
-        </Tooltip>
-        <Tooltip>
+        </Tooltip> : null}
+        {!simulationComplete ? <Tooltip>
           <TooltipTrigger asChild>
             <button
+              type="button"
               className={btn}
               style={btnStyle}
-              onClick={stepNext}
+              onClick={() => void stepNext()}
               aria-label="Go to next simulation minute"
-              disabled={simulationComplete}
             >
-              <StepForward className="h-4 w-4" />
+              <StepForward className="h-4 w-4" aria-hidden="true" />
             </button>
           </TooltipTrigger>
           <TooltipContent>Next minute</TooltipContent>
-        </Tooltip>
-        <Tooltip>
+        </Tooltip> : null}
+        {!simulationComplete ? <Tooltip>
           <TooltipTrigger asChild>
             <button
+              type="button"
               className="font-mono rounded-md h-8 px-2.5 uppercase transition-colors"
               style={{ ...btnStyle, fontSize: "11px", letterSpacing: "0.08em", color: "var(--accent-primary)" }}
               onClick={toggleSpeed}
@@ -261,7 +287,7 @@ function SimControls() {
             </button>
           </TooltipTrigger>
           <TooltipContent>Speed 1× / 4×</TooltipContent>
-        </Tooltip>
+        </Tooltip> : null}
         {showReset ? <ResetDemoDialog /> : null}
       </div>
     </TooltipProvider>

@@ -1,5 +1,6 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo } from "react";
 import { AnimatePresence, motion } from "motion/react";
+import { useSearchParams } from "react-router";
 import { useSim } from "../store/SimContext";
 import { MicroLabel, PriorityChip } from "../components/primitives";
 import { StageStepper } from "../components/StageStepper";
@@ -15,20 +16,23 @@ import {
 export function PatientGuidance() {
   const { state } = useSim();
   const { patients, recommendations } = state;
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const active = useMemo(
     () => patients.filter((p) => p.registered),
     [patients],
   );
 
-  const [selectedId, setSelectedId] = useState<string | null>(null);
-  useEffect(() => {
-    if ((!selectedId || !active.find((p) => p.id === selectedId)) && active.length) {
-      setSelectedId(active[0].id);
-    }
-  }, [active, selectedId]);
+  const requestedPatientId = searchParams.get("patient");
+  const patient =
+    active.find((candidate) => candidate.id === requestedPatientId) ?? active[0];
 
-  const patient = active.find((p) => p.id === selectedId) ?? active[0];
+  useEffect(() => {
+    if (patient && requestedPatientId !== patient.id) {
+      setSearchParams({ patient: patient.id }, { replace: true });
+    }
+  }, [patient, requestedPatientId, setSearchParams]);
+
   const rec = patient ? recommendations[patient.id] : null;
 
   if (!patient) {
@@ -47,8 +51,11 @@ export function PatientGuidance() {
     <div className="max-w-3xl mx-auto px-4 sm:px-6 py-8 flex flex-col gap-8 items-center">
       {/* Patient selector — demo affordance */}
       <div className="w-full flex justify-center">
-        <Select value={patient.id} onValueChange={setSelectedId}>
-          <SelectTrigger className="w-[220px] font-mono" style={{ fontSize: "12px", backgroundColor: "var(--bg-surface)", borderColor: "var(--border-default)" }}>
+        <Select
+          value={patient.id}
+          onValueChange={(patientId) => setSearchParams({ patient: patientId })}
+        >
+          <SelectTrigger aria-label="Choose a patient" className="w-[220px] font-mono" style={{ fontSize: "12px", backgroundColor: "var(--bg-surface)", borderColor: "var(--border-default)" }}>
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
