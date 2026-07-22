@@ -4,7 +4,7 @@ import { AlertTriangle, ArrowRight, UserRoundSearch } from "lucide-react";
 import { useNavigate } from "react-router";
 import { useSim, formatSimClock } from "../store/SimContext";
 import type { Patient } from "../lib/types";
-import { MicroLabel, MonoTag, Panel, PriorityChip, GuardrailNote } from "../components/primitives";
+import { MicroLabel, MonoTag, Panel, PriorityChip } from "../components/primitives";
 import { apiUrl } from "../lib/api";
 import { formatBriefContent } from "../lib/brief-format";
 
@@ -299,7 +299,6 @@ function Brief({
 
       <div className="flex flex-col gap-2">
         <span style={{ fontSize: "12px", color: "var(--text-muted)" }}>Generated from historical records — verify critical details.</span>
-        <GuardrailNote />
       </div>
     </section>
   );

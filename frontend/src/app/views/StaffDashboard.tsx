@@ -3,7 +3,7 @@ import { AnimatePresence } from "motion/react";
 import { ArrowRight, Search } from "lucide-react";
 import { useSim, formatSimTime } from "../store/SimContext";
 import type { Patient, Stage } from "../lib/types";
-import { MicroLabel, Panel, PriorityChip, QuoteBlock, GuardrailNote, MonoTag } from "../components/primitives";
+import { MicroLabel, Panel, PriorityChip, QuoteBlock, MonoTag } from "../components/primitives";
 import { StatCard } from "../components/StatCard";
 import { ResourceCard } from "../components/ResourceCard";
 import { AlertCard } from "../components/AlertCard";
@@ -172,7 +172,6 @@ export function StaffDashboard() {
               )}
             </AnimatePresence>
           </div>
-          <GuardrailNote />
         </div>
       </div>
 
@@ -312,7 +311,6 @@ export function StaffDashboard() {
                     </div>
                   </div>
                 )}
-                <GuardrailNote />
               </div>
             </>
           )}

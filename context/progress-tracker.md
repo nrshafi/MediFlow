@@ -12,6 +12,10 @@ Update this file after every meaningful implementation change.
 
 ## Completed
 
+- 2026-07-22 - Upgraded `RoleSwitcher` in `Shell.tsx` to Option 2 (Dynamic Pill layout): replaced static text tabs with dynamic icon pills (`Building2` for Staff, `Stethoscope` for Doctor, `User` for Patient) that expand to show uppercase text labels for the active tab, and added bottom tooltips for all role switcher buttons.
+
+- 2026-07-22 - Removed the GuardrailNote warning element ("⚠ THE LLM NEVER MAKES A SCHEDULING OR CLINICAL DECISION.") and its references from `primitives.tsx`, `StaffDashboard.tsx`, and `DoctorBrief.tsx`.
+
 - 2026-07-22 - Fixed title bar icon and browser favicon branding by adding dedicated SVG (`favicon.svg`), 32x32 ICO/PNG (`favicon.ico`, `favicon-32x32.png`), and Apple touch icon assets to `frontend/public/` and root `public/`, adding cache-busting version parameters (`?v=mediflow`) in `frontend/index.html` to force browser tab icon refresh, and adding a matching gradient logo icon mark beside the MediFlow brand name in `Shell.tsx` `TopBar`.
 
 - 2026-07-22 - Fixed unnecessary horizontal scrollbar in `StageStepper` by adding horizontal/vertical element padding (`px-5 sm:px-6 pt-4 pb-2`) to contain active step `animate-ping` keyframe scale expansion, adding `pointer-events-none` to the ping element, and adding `.no-scrollbar` styling across `PatientGuidance` and `StaffDashboard`.

@@ -129,23 +129,6 @@ export function QuoteBlock({ children, large = false }: { children: ReactNode; l
   );
 }
 
-// ── GuardrailNote — dashed warning border, transparent bg, mono uppercase ──
-export function GuardrailNote({ children }: { children?: ReactNode }) {
-  return (
-    <div
-      className="font-mono rounded-md px-3 py-2 uppercase"
-      style={{
-        border: "1.5px dashed var(--state-warning)",
-        color: "var(--state-warning)",
-        fontSize: "11px",
-        letterSpacing: "0.1em",
-        lineHeight: 1.5,
-      }}
-    >
-      {children ?? "⚠ THE LLM NEVER MAKES A SCHEDULING OR CLINICAL DECISION."}
-    </div>
-  );
-}
 
 // ── DataFooter — persistent simulated-data disclaimer ──
 export function DataFooter() {

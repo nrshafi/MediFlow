@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router";
-import { Check, LoaderCircle, Pause, Play, RotateCcw, StepForward } from "lucide-react";
+import { Building2, Check, LoaderCircle, Pause, Play, RotateCcw, StepForward, Stethoscope, User } from "lucide-react";
 import { useSim, formatSimClock } from "../store/SimContext";
 import {
   Dialog,
@@ -168,10 +168,15 @@ function ResetDemoDialog() {
   );
 }
 
-const ROLES: Array<{ key: string; label: string; path: string }> = [
-  { key: "staff", label: "STAFF", path: "/staff" },
-  { key: "doctor", label: "DOCTOR", path: "/doctor" },
-  { key: "patient", label: "PATIENT", path: "/patient" },
+const ROLES: Array<{
+  key: string;
+  label: string;
+  icon: React.ComponentType<{ className?: string }>;
+  path: string;
+}> = [
+  { key: "staff", label: "STAFF", icon: Building2, path: "/staff" },
+  { key: "doctor", label: "DOCTOR", icon: Stethoscope, path: "/doctor" },
+  { key: "patient", label: "PATIENT", icon: User, path: "/patient" },
 ];
 
 function RoleSwitcher() {
@@ -179,41 +184,54 @@ function RoleSwitcher() {
   const location = useLocation();
   const active = ROLES.find((r) => location.pathname.startsWith(r.path))?.key ?? "staff";
   return (
-    <div
-      className="inline-flex rounded-full p-1"
-      style={{ backgroundColor: "var(--bg-surface)", border: "1px solid var(--border-default)" }}
-      role="tablist"
-      aria-label="Role switcher"
-    >
-      {ROLES.map((r) => {
-        const isActive = r.key === active;
-        return (
-          <button
-            type="button"
-            key={r.key}
-            role="tab"
-            aria-selected={isActive}
-            onClick={() => {
-              navigate(r.path);
-              try {
-                window.localStorage.setItem("mediflow.role", r.key);
-              } catch {
-                /* ignore */
-              }
-            }}
-            className="font-mono rounded-full px-4 py-1.5 uppercase transition-colors"
-            style={{
-              fontSize: "11px",
-              letterSpacing: "0.12em",
-              backgroundColor: isActive ? "color-mix(in srgb, var(--accent-primary) 15%, transparent)" : "transparent",
-              color: isActive ? "var(--accent-primary)" : "var(--text-muted)",
-            }}
-          >
-            {r.label}
-          </button>
-        );
-      })}
-    </div>
+    <TooltipProvider delayDuration={200}>
+      <div
+        className="inline-flex items-center rounded-full p-1 gap-1"
+        style={{ backgroundColor: "var(--bg-surface)", border: "1px solid var(--border-default)" }}
+        role="tablist"
+        aria-label="Role switcher"
+      >
+        {ROLES.map((r) => {
+          const isActive = r.key === active;
+          const Icon = r.icon;
+          return (
+            <Tooltip key={r.key}>
+              <TooltipTrigger asChild>
+                <button
+                  type="button"
+                  role="tab"
+                  aria-selected={isActive}
+                  aria-label={`${r.label} View`}
+                  onClick={() => {
+                    navigate(r.path);
+                    try {
+                      window.localStorage.setItem("mediflow.role", r.key);
+                    } catch {
+                      /* ignore */
+                    }
+                  }}
+                  className="font-mono inline-flex items-center justify-center rounded-full px-3 py-1.5 uppercase transition-all duration-200"
+                  style={{
+                    fontSize: "11px",
+                    letterSpacing: "0.12em",
+                    backgroundColor: isActive
+                      ? "color-mix(in srgb, var(--accent-primary) 15%, transparent)"
+                      : "transparent",
+                    color: isActive ? "var(--accent-primary)" : "var(--text-muted)",
+                  }}
+                >
+                  <Icon className="h-4 w-4 shrink-0" />
+                  {isActive && <span className="ml-2">{r.label}</span>}
+                </button>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" className="text-xs font-sans">
+                {r.label} View
+              </TooltipContent>
+            </Tooltip>
+          );
+        })}
+      </div>
+    </TooltipProvider>
   );
 }
 
