@@ -1,17 +1,39 @@
 flowchart TD
-    Tick[POST /api/simulation/tick] --> Load[Load persisted state]
-    Load --> Clock[Plan minute + 1\nand record unique clock event]
-    Clock --> Complete[Complete due services\npatient-ID order]
-    Complete --> Arrive[Register due arrivals\npatient-ID order]
-    Arrive --> Eligible[Find registered, unfinished\npatients not active or queued]
-    Eligible --> Services[Evaluate each incomplete\nrequired service]
-    Services --> Project[Project work ahead + remaining\nvisit service time]
-    Project --> Choose[Choose lowest projected whole-visit finish\ntie-break: service position, resource ID]
-    Choose --> Queue[Place patient in one resource queue]
-    Queue --> Order[Sort each queue\nurgent → normal → FIFO → patient ID]
-    Order --> Start[Start head of each idle resource]
-    Start --> Persist[Atomically persist resource state,\nqueues, timeline, events, and metrics]
-    Persist --> Snapshot[GET /api/operations polling snapshot]
+    %% MediFlow 1-Minute Discrete Simulation Tick & Scheduler Flow Diagram
 
-    classDef decision fill:#0F2032,stroke:#E5C04B,color:#E9F2F8
-    class Project,Choose,Order decision
+    subgraph Phase1["Phase 1: Clock Advancement & Ingestion"]
+        Tick["<b>Simulation Tick Call</b><br/>POST /api/simulation/tick"] --> Clock["<b>Advance Clock & Complete Services</b><br/>Update simulation minute & mark finished services"]
+        Clock --> Arrivals["<b>Register Patient Arrivals</b><br/>Transition due arrivals to Registered state"]
+    end
+
+    subgraph Phase2["Phase 2: Deterministic Routing Engine"]
+        Arrivals --> Eligible["<b>Find Eligible Patients</b><br/>Registered patients with unfinished services"]
+        Eligible --> Routing["<b>Lowest Projected Finish Routing</b><br/>Select resource offering earliest completion"]
+    end
+
+    subgraph Phase3["Phase 3: Queueing & Resource Dispatch"]
+        Routing --> Queue["<b>Sort Resource Queues</b><br/>Urgent priority first, then FIFO"]
+        Queue --> Dispatch{"<b>Is Resource Free &<br/>Patient at Head?</b>"}
+        Dispatch -->|Yes| InService["<b>Dispatch to InService</b><br/>Set resource state = Busy"]
+        Dispatch -->|No| Queued["<b>Remain Queued</b><br/>Patient waits in resource queue"]
+    end
+
+    subgraph Phase4["Phase 4: Persistence & Metric Snapshot"]
+        InService --> Metrics["<b>Compute Operational Metrics</b><br/>Wait times, utilization & queue depth"]
+        Queued --> Metrics
+        Metrics --> Persist[("<b>Atomically Persist to Turso</b><br/>Save state, events & metrics batch")]
+        Persist --> Clients["<b>Client UI Sync</b><br/>Dashboard updates via GET /api/operations"]
+    end
+
+    %% Styling and Class Definitions
+    classDef phase1 fill:#F0F9FF,stroke:#0284C7,color:#0F172A,stroke-width:2px
+    classDef phase2 fill:#FEF3C7,stroke:#D97706,color:#0F172A,stroke-width:2px
+    classDef phase3 fill:#F0FDFA,stroke:#0D9488,color:#0F172A,stroke-width:2px
+    classDef phase4 fill:#F1F5F9,stroke:#64748B,color:#0F172A,stroke-width:2px
+    classDef decision fill:#FDF2F8,stroke:#DB2777,color:#0F172A,stroke-width:2px
+
+    class Tick,Clock,Arrivals phase1
+    class Eligible,Routing phase2
+    class Queue,InService,Queued phase3
+    class Metrics,Persist,Clients phase4
+    class Dispatch decision

@@ -1,22 +1,30 @@
 flowchart LR
-    Facts[Persisted facts\npatient history, selected resource, ETA]
-    Engine[Deterministic scheduler\nselects route]
-    Prompt[Prompt builder]
-    Adapter[Provider-agnostic\nGemini adapter]
-    Text[Patient explanation\nor six-section doctor brief]
-    Cache[(Source-hash cache)]
-    Fallback[Deterministic fallback text]
-    UI[Patient and doctor views]
+    %% MediFlow AI Architecture & Safety Boundary Diagram (Simplified)
 
-    Engine -->|decision facts only| Facts
-    Facts --> Prompt
-    Prompt --> Adapter
-    Adapter -->|success| Text
-    Text --> Cache
-    Cache --> UI
-    Adapter -->|timeout or unavailable| Fallback
-    Fallback --> UI
-    UI -. never writes decisions .-> Engine
+    subgraph Core["Deterministic Core"]
+        Engine["<b>Pure Scheduler</b><br/>Computes routing & queues"] --> Facts["<b>Decision Facts</b><br/>Assigned resource, ETA, priority"]
+    end
 
-    classDef protected fill:#0F2032,stroke:#E5C04B,color:#E9F2F8
-    class Engine protected
+    subgraph AIPipeline["Safe LLM Layer"]
+        Facts --> Prompt["<b>Prompt Builder</b><br/>Formats facts + medical history"]
+        Prompt --> Gemini["<b>Gemini LLM Adapter</b><br/>Generates text guidance & brief"]
+        Gemini -->|Success| Cache[("<b>Turso Cache</b><br/>Source-hash keyed")]
+        Gemini -->|Timeout / No Key| Fallback["<b>Deterministic Fallback</b><br/>Safe default text"]
+    end
+
+    subgraph UI["Client UI"]
+        Cache --> Views["<b>Patient & Doctor Views</b><br/>Guidance card & pre-consult brief"]
+        Fallback --> Views
+    end
+
+    %% Safety Boundary Constraint
+    Views -. "Strict Boundary: Never alters engine decisions" .-> Engine
+
+    %% Styling
+    classDef core fill:#FEF3C7,stroke:#D97706,color:#0F172A,stroke-width:2px
+    classDef ai fill:#F0FDFA,stroke:#0D9488,color:#0F172A,stroke-width:2px
+    classDef ui fill:#F0F9FF,stroke:#0284C7,color:#0F172A,stroke-width:2px
+
+    class Engine,Facts core
+    class Prompt,Gemini,Cache,Fallback ai
+    class Views ui

@@ -1,29 +1,58 @@
-flowchart LR
-    Staff[Staff dashboard]
-    Patient[Patient guidance]
-    Doctor[Doctor brief]
-    Frontend[React frontend\nshared polling context]
-    API[Hono API\nCloudflare Worker]
-    Scheduler[Pure deterministic\nscheduling engine]
-    Simulation[One-minute simulation\nclock and event planner]
-    DB[(Turso / libSQL\noperational state, events, metrics)]
-    LLM[Gemini via\nprovider adapter]
-    Cache[(Cached LLM output)]
+flowchart TB
+    %% MediFlow System Overview & Architectural Overlay Diagram (Simplified)
 
-    Staff --> Frontend
-    Patient --> Frontend
-    Doctor --> Frontend
-    Frontend -->|GET operations, brief| API
-    Frontend -->|POST one-minute tick| API
-    API --> Simulation
-    Simulation --> Scheduler
-    Simulation <--> DB
-    API <--> DB
-    API -->|facts only| LLM
-    LLM --> Cache
-    Cache --> API
+    subgraph ClientLayer["Frontend Client Layer (React / Vite)"]
+        direction LR
+        Views["<b>Role-Based Views</b><br/>Staff Dashboard · Patient Guidance · Doctor Brief"]
+        PollingContext["<b>Shared Polling Data Layer</b><br/>Continuous REST fetch (every 2s)<br/>Client renders state — never schedules"]
+        
+        Views <--> PollingContext
+    end
 
-    classDef boundary fill:#0A1826,stroke:#22D3EE,color:#E9F2F8
-    classDef storage fill:#0F2032,stroke:#3BE8C8,color:#E9F2F8
-    class Frontend,API,Scheduler,Simulation boundary
-    class DB,Cache storage
+    subgraph APILayer["Cloudflare Worker API Layer (Hono Router)"]
+        direction LR
+        Routes["<b>HTTP REST Endpoint Router</b><br/>GET /api/operations · POST /api/simulation/tick<br/>POST /api/simulation/reset · POST /api/llm/brief"]
+        SimPlanner["<b>Simulation Tick Coordinator</b><br/>Advances 1-minute discrete clock,<br/>records clock event & triggers engine"]
+        
+        Routes <--> SimPlanner
+    end
+
+    subgraph CoreEngine["Pure Orchestration Engine (TypeScript Core)"]
+        direction LR
+        Scheduler["<b>Deterministic Scheduler</b><br/>Lowest Projected Whole-Visit Finish routing"]
+        PriorityQueue["<b>Priority Queue & Congestion</b><br/>Urgent > Normal (FIFO) · Congested if queue ≥ 4 or wait > 25m"]
+        
+        Scheduler --- PriorityQueue
+    end
+
+    subgraph StorageLayer["Persistence Layer (Turso / libSQL SQLite + Drizzle)"]
+        Database[("(Turso SQLite Database)<br/>Operational Schema · Audit & Event Schema · LLM Cache Schema")]
+    end
+
+    subgraph AILayer["Safe AI Explanation Layer (Gemini Adapter)"]
+        direction LR
+        Adapter["<b>Provider-Agnostic LLM Adapter</b><br/>Gemini API integration with strict timeouts"]
+        FallbackEngine["<b>Deterministic Fallback Generator</b><br/>Generates safe text when LLM key or network is unavailable"]
+        
+        Adapter -->|Timeout / Fail| FallbackEngine
+    end
+
+    %% Data Flow Connections
+    PollingContext <-->|HTTP REST Requests & Snapshots| Routes
+    SimPlanner -->|In-Memory Execution| CoreEngine
+    SimPlanner <-->|Atomic libSQL Batch Transaction| Database
+    Routes -->|Fetch Decision Facts| AILayer
+    AILayer <-->|Read / Write Cached Text| Database
+
+    %% Styling and Class Definitions
+    classDef client fill:#F0F9FF,stroke:#0284C7,color:#0F172A,stroke-width:2px
+    classDef api fill:#F0FDFA,stroke:#0D9488,color:#0F172A,stroke-width:2px
+    classDef engine fill:#FEF3C7,stroke:#D97706,color:#0F172A,stroke-width:2px
+    classDef storage fill:#F1F5F9,stroke:#64748B,color:#0F172A,stroke-width:2px
+    classDef ai fill:#FDF2F8,stroke:#DB2777,color:#0F172A,stroke-width:2px
+
+    class Views,PollingContext client
+    class Routes,SimPlanner api
+    class Scheduler,PriorityQueue engine
+    class Database storage
+    class Adapter,FallbackEngine ai

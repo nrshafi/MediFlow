@@ -1,19 +1,14 @@
 stateDiagram-v2
+    %% MediFlow Patient State Diagram (Simplified)
+
     [*] --> NotArrived
-    NotArrived --> Registered: arrival minute reached
-    Registered --> Queued: scheduler selects next resource
-    Queued --> InService: resource is idle and patient is queue head
-    InService --> Registered: service completes; unfinished services remain
-    InService --> Completed: all required services complete
+
+    NotArrived --> Registered
+    Registered --> Queued : Resource Assigned (Priority / FIFO)
+    Queued --> InService : Resource Free & Queue Head
+
+    InService --> Registered : Unfinished Services Remain
+    InService --> Completed : All Required Services Finished
+
     Completed --> [*]
 
-    note right of Queued
-      One queue at a time.
-      Urgent before normal;
-      FIFO within priority.
-    end note
-
-    note right of InService
-      One active service at a time.
-      Active care is never preempted.
-    end note
