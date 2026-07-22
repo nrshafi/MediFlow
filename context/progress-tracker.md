@@ -12,6 +12,8 @@ Update this file after every meaningful implementation change.
 
 ## Completed
 
+- 2026-07-22 - Fixed title bar icon and browser favicon branding by adding dedicated SVG (`favicon.svg`), 32x32 ICO/PNG (`favicon.ico`, `favicon-32x32.png`), and Apple touch icon assets to `frontend/public/`, linking favicon tags in `frontend/index.html`, and adding a matching gradient logo icon mark beside the MediFlow brand name in `Shell.tsx` `TopBar`.
+
 - 2026-07-22 - Fixed unnecessary horizontal scrollbar in `StageStepper` by adding horizontal/vertical element padding (`px-5 sm:px-6 pt-4 pb-2`) to contain active step `animate-ping` keyframe scale expansion, adding `pointer-events-none` to the ping element, and adding `.no-scrollbar` styling across `PatientGuidance` and `StaffDashboard`.
 
 - 2026-07-22 - Fixed top-clipping of active step circle `animate-ping` pulse animation in `StageStepper` by adding top padding (`pt-3.5 pb-2` / `px-3.5`) to `StageStepper` and updating `overflow-x-auto` wrapper padding across `StaffDashboard` and `PatientGuidance`.

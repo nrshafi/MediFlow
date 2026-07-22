@@ -310,7 +310,15 @@ export function TopBar() {
         className="flex items-center justify-between px-4 sm:px-6 gap-4 flex-wrap"
         style={{ minHeight: "60px", backgroundColor: "var(--bg-base)", borderBottom: "1px solid var(--border-default)" }}
       >
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2.5">
+          <div className="flex size-7 items-center justify-center rounded-lg shadow-sm" style={{ background: "linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%)" }}>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none" className="size-4" aria-hidden="true">
+              <path d="M16 6V26" stroke="white" strokeOpacity="0.4" strokeWidth="2.5" strokeLinecap="round" />
+              <path d="M5 16H9.5L12 11L15 21L18 12L20.5 16H27" stroke="white" strokeWidth="2.25" strokeLinecap="round" strokeLinejoin="round" />
+              <circle cx="16" cy="6" r="2" fill="#67E8F9" />
+              <circle cx="16" cy="26" r="2" fill="#67E8F9" />
+            </svg>
+          </div>
           <span style={{ fontSize: "20px", fontWeight: 600 }}>
             <span style={{ color: "var(--text-primary)" }}>Medi</span>
             <span style={{ color: "var(--accent-primary)" }}>Flow</span>
