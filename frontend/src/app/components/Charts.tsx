@@ -23,7 +23,7 @@ const SERIES_COLORS = [
 
 const axisTick = { fontSize: 10, fontFamily: "var(--font-mono)", fill: "var(--text-muted)" };
 
-function DarkTooltip({ active, payload, label }: { active?: boolean; payload?: Array<{ name: string; value: number; color: string }>; label?: string | number }) {
+function ChartTooltip({ active, payload, label }: { active?: boolean; payload?: Array<{ name: string; value: number; color: string }>; label?: string | number }) {
   if (!active || !payload?.length) return null;
   return (
     <div
@@ -67,7 +67,7 @@ export function QueueDepthChart({ resources }: { resources: Resource[] }) {
             <CartesianGrid stroke="var(--border-default)" vertical={false} />
             <XAxis dataKey="t" tick={axisTick} interval={5} axisLine={{ stroke: "var(--border-default)" }} tickLine={false} />
             <YAxis tick={axisTick} axisLine={{ stroke: "var(--border-default)" }} tickLine={false} allowDecimals={false} />
-            <Tooltip content={<DarkTooltip />} />
+            <Tooltip content={<ChartTooltip />} />
             {resources.map((r, i) => (
               <Line key={r.id} type="monotone" dataKey={r.name} stroke={SERIES_COLORS[i % 6]} strokeWidth={1.5} dot={false} isAnimationActive={false} />
             ))}
@@ -97,7 +97,7 @@ export function ComparisonChart({ metrics }: { metrics: Metrics }) {
             <CartesianGrid stroke="var(--border-default)" vertical={false} />
             <XAxis dataKey="metric" tick={axisTick} axisLine={{ stroke: "var(--border-default)" }} tickLine={false} />
             <YAxis tick={axisTick} axisLine={{ stroke: "var(--border-default)" }} tickLine={false} unit="m" />
-            <Tooltip content={<DarkTooltip />} cursor={{ fill: "color-mix(in srgb, var(--accent-primary) 6%, transparent)" }} />
+            <Tooltip content={<ChartTooltip />} cursor={{ fill: "color-mix(in srgb, var(--accent-primary) 6%, transparent)" }} />
             <Bar dataKey="Uncoordinated" fill="var(--series-5)" radius={[3, 3, 0, 0]} isAnimationActive={false} />
             <Bar dataKey="MediFlow" fill="var(--accent-primary)" radius={[3, 3, 0, 0]} isAnimationActive={false} />
           </BarChart>

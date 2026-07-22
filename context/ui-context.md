@@ -2,36 +2,36 @@
 
 ## Theme
 
-Dark only. No light mode. The design language follows the MediFlow pitch deck: a dark clinical control room — near-black navy backgrounds, layered card surfaces with thin borders, vivid cyan for accents and interactive elements, teal-green for positive states, and an ECG-pulse motif. Uppercase, letter-spaced monospace micro-labels tag sections and statuses. Calm, high-contrast, data-forward.
+Light clinical control room. High-contrast crisp off-white background, layered pure-white card surfaces with subtle borders, rich cyan/teal for accents and interactive elements, emerald green for positive states, rose for busy/error states, and amber for warnings. Uppercase, letter-spaced monospace micro-labels tag sections and statuses. Calm, legible, data-forward.
 
 ## Colors
 
-All components must use these tokens — no hardcoded hex values. Values are derived from the pitch deck. *(proposed — fine-tune once the design is in the browser)*
+All components must use these tokens — no hardcoded hex values.
 
 | Role                | CSS Variable         | Value     |
 | ------------------- | -------------------- | --------- |
-| Page background     | `--bg-base`          | `#050D18` |
-| Surface (cards)     | `--bg-surface`       | `#0A1826` |
-| Raised surface      | `--bg-raised`        | `#0F2032` |
-| Primary text        | `--text-primary`     | `#E9F2F8` |
-| Muted text          | `--text-muted`       | `#8AA0B4` |
-| Primary accent      | `--accent-primary`   | `#22D3EE` |
-| Secondary accent    | `--accent-secondary` | `#3BE8C8` |
-| Border              | `--border-default`   | `#1A2C40` |
-| Error / Busy        | `--state-error`      | `#F4587E` |
-| Success / Available | `--state-success`    | `#2EE6A8` |
-| Warning / Congested | `--state-warning`    | `#E5C04B` |
+| Page background     | `--bg-base`          | `#EEF2F6` |
+| Surface (cards)     | `--bg-surface`       | `#FFFFFF` |
+| Raised surface      | `--bg-raised`        | `#E2E8F0` |
+| Primary text        | `--text-primary`     | `#020617` |
+| Muted text          | `--text-muted`       | `#334155` |
+| Primary accent      | `--accent-primary`   | `#0284C7` |
+| Secondary accent    | `--accent-secondary` | `#0D9488` |
+| Border              | `--border-default`   | `#CBD5E1` |
+| Error / Busy        | `--state-error`      | `#E11D48` |
+| Success / Available | `--state-success`    | `#15803D` |
+| Warning / Congested | `--state-warning`    | `#D97706` |
 
 Status semantics: resource chips map **Available → success**, **Busy → error**, **Congested/at-risk → warning**. Guardrail notes (e.g. the LLM safety rule) use a dashed `--state-warning` border, per the deck.
 
 ## Typography
 
-| Role        | Font           | Variable      |
-| ----------- | -------------- | ------------- |
-| UI text     | Inter          | `--font-sans` |
-| Code / mono | JetBrains Mono | `--font-mono` |
+| Role        | Font  | Variable      |
+| ----------- | ----- | ------------- |
+| UI text     | Inter | `--font-sans` |
+| Micro / tag | Inter | `--font-mono` (aliased to `--font-sans`) |
 
-Mono is used for micro-labels (uppercase, wide letter-spacing), status tags, metric values, and LLM guidance quote blocks — mirroring the deck. *(Font pairing proposed; the deck's source fonts are not web-standard.)*
+All UI elements, micro-labels, status tags, metric values, and guidance blocks use standard proportional sans-serif typography (`Inter`), with monospace fonts removed entirely.
 
 ## Border Radius
 

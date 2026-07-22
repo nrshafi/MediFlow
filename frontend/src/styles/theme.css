@@ -119,51 +119,51 @@
   --color-sidebar-ring: var(--sidebar-ring);
 }
 
-/* ─── MediFlow dark clinical control-room tokens ─────────────── */
+/* ─── MediFlow light clinical control-room tokens ─────────────── */
 :root {
-  --bg-base: #050D18;
-  --bg-surface: #0A1826;
-  --bg-raised: #0F2032;
-  --text-primary: #E9F2F8;
-  --text-muted: #8AA0B4;
-  --accent-primary: #22D3EE;
-  --accent-secondary: #3BE8C8;
-  --border-default: #1A2C40;
-  --state-success: #2EE6A8;
-  --state-error: #F4587E;
-  --state-warning: #E5C04B;
+  --bg-base: #EEF2F6;
+  --bg-surface: #FFFFFF;
+  --bg-raised: #E2E8F0;
+  --text-primary: #020617;
+  --text-muted: #334155;
+  --accent-primary: #0284C7;
+  --accent-secondary: #0D9488;
+  --border-default: #CBD5E1;
+  --state-success: #15803D;
+  --state-error: #E11D48;
+  --state-warning: #D97706;
 
   --font-sans: 'Inter', system-ui, sans-serif;
-  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+  --font-mono: var(--font-sans);
 
-  /* Remap shadcn/radix tokens to the dark clinical palette so portalled
+  /* Remap shadcn/radix tokens to the light clinical palette so portalled
      popovers, tooltips, dialogs, selects, and skeletons stay on-theme. */
-  --background: #050D18;
-  --foreground: #E9F2F8;
-  --card: #0A1826;
-  --card-foreground: #E9F2F8;
-  --popover: #0F2032;
-  --popover-foreground: #E9F2F8;
-  --primary: #22D3EE;
-  --primary-foreground: #050D18;
-  --secondary: #0F2032;
-  --secondary-foreground: #E9F2F8;
-  --muted: #0F2032;
-  --muted-foreground: #8AA0B4;
-  --accent: #0F2032;
-  --accent-foreground: #E9F2F8;
-  --border: #1A2C40;
-  --input: #1A2C40;
-  --input-background: #0A1826;
-  --ring: #22D3EE;
+  --background: #EEF2F6;
+  --foreground: #020617;
+  --card: #FFFFFF;
+  --card-foreground: #020617;
+  --popover: #FFFFFF;
+  --popover-foreground: #020617;
+  --primary: #0284C7;
+  --primary-foreground: #FFFFFF;
+  --secondary: #E2E8F0;
+  --secondary-foreground: #020617;
+  --muted: #E2E8F0;
+  --muted-foreground: #334155;
+  --accent: #E2E8F0;
+  --accent-foreground: #020617;
+  --border: #CBD5E1;
+  --input: #CBD5E1;
+  --input-background: #FFFFFF;
+  --ring: #0284C7;
 
   /* Chart series palette */
-  --series-1: #22D3EE;
-  --series-2: #3BE8C8;
-  --series-3: #E5C04B;
-  --series-4: #F4587E;
-  --series-5: #5B8DB8;
-  --series-6: #8AA0B4;
+  --series-1: #0284C7;
+  --series-2: #0D9488;
+  --series-3: #D97706;
+  --series-4: #E11D48;
+  --series-5: #4F46E5;
+  --series-6: #334155;
 }
 
 @layer base {
@@ -175,6 +175,13 @@
     background-color: var(--bg-base);
     color: var(--text-primary);
     font-family: var(--font-sans);
+  }
+
+  /* Enhanced contrast card depth & shadow structure */
+  [style*="--bg-surface"],
+  .rounded-xl,
+  .rounded-2xl {
+    box-shadow: 0 1px 3px 0 rgba(15, 23, 42, 0.08), 0 1px 2px -1px rgba(15, 23, 42, 0.04);
   }
 
   .font-mono,
