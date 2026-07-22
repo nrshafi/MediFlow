@@ -62,6 +62,16 @@ export function StaffDashboard() {
     });
   }, [inHouse, query, stageFilter]);
 
+  const doctorResources = useMemo(
+    () => resources.filter((r) => r.type === "doctor"),
+    [resources],
+  );
+
+  const facilityResources = useMemo(
+    () => resources.filter((r) => r.type !== "doctor"),
+    [resources],
+  );
+
   if (loading) return <DashboardSkeleton />;
 
   const selectedRec = selected ? recommendations[selected.id] : null;
@@ -93,12 +103,53 @@ export function StaffDashboard() {
       {/* Main + rail */}
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
         <div className="xl:col-span-2 flex flex-col gap-6">
-          <div>
-            <MicroLabel>RESOURCES</MicroLabel>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-3">
-              {resources.map((r) => (
-                <ResourceCard key={r.id} resource={r} patients={patients} />
-              ))}
+          <div className="flex flex-col gap-6">
+            <div>
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <MicroLabel>DOCTORS & MEDICAL STAFF</MicroLabel>
+                  <span
+                    className="font-mono rounded-full px-2 py-0.5"
+                    style={{
+                      fontSize: "10px",
+                      backgroundColor: "var(--bg-raised)",
+                      color: "var(--text-muted)",
+                      border: "1px solid var(--border-default)",
+                    }}
+                  >
+                    {doctorResources.length}
+                  </span>
+                </div>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {doctorResources.map((r) => (
+                  <ResourceCard key={r.id} resource={r} patients={patients} />
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <MicroLabel>DIAGNOSTICS & LAB FACILITIES</MicroLabel>
+                  <span
+                    className="font-mono rounded-full px-2 py-0.5"
+                    style={{
+                      fontSize: "10px",
+                      backgroundColor: "var(--bg-raised)",
+                      color: "var(--text-muted)",
+                      border: "1px solid var(--border-default)",
+                    }}
+                  >
+                    {facilityResources.length}
+                  </span>
+                </div>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {facilityResources.map((r) => (
+                  <ResourceCard key={r.id} resource={r} patients={patients} />
+                ))}
+              </div>
             </div>
           </div>
         </div>
