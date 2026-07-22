@@ -12,6 +12,10 @@ Update this file after every meaningful implementation change.
 
 ## Completed
 
+- 2026-07-22 - Fixed unnecessary horizontal scrollbar in `StageStepper` by adding horizontal/vertical element padding (`px-5 sm:px-6 pt-4 pb-2`) to contain active step `animate-ping` keyframe scale expansion, adding `pointer-events-none` to the ping element, and adding `.no-scrollbar` styling across `PatientGuidance` and `StaffDashboard`.
+
+- 2026-07-22 - Fixed top-clipping of active step circle `animate-ping` pulse animation in `StageStepper` by adding top padding (`pt-3.5 pb-2` / `px-3.5`) to `StageStepper` and updating `overflow-x-auto` wrapper padding across `StaffDashboard` and `PatientGuidance`.
+
 - 2026-07-22 - Categorized hospital resources on StaffDashboard into distinct sub-sections ("DOCTORS & MEDICAL STAFF" and "DIAGNOSTICS & LAB FACILITIES") with count badges; enhanced ResourceCard with category tags (DOCTOR / DIAGNOSTIC) and Lucide icons (Stethoscope, FlaskConical, Scan, Activity)
 
 - 2026-07-22 - Enhanced visual contrast and surface depth across theme.css and ui-context.md: deepened background slate contrast (#EEF2F6), sharpened card borders (#CBD5E1), intensified muted text legibility (#334155 / Slate-700), saturated primary accents (#0284C7), and added card elevation shadows

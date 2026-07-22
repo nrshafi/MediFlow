@@ -117,7 +117,7 @@ export function PatientGuidance() {
       )}
 
       {/* Stepper */}
-      <div className="w-full overflow-x-auto pb-2">
+      <div className="w-full overflow-x-auto no-scrollbar py-1">
         <StageStepper patient={patient} />
       </div>
     </div>

@@ -294,7 +294,7 @@ export function StaffDashboard() {
               <div className="flex flex-col gap-5 pt-2">
                 <div>
                   <MicroLabel>VISIT TIMELINE</MicroLabel>
-                  <div className="mt-3 overflow-x-auto pb-2">
+                  <div className="mt-1 overflow-x-auto no-scrollbar py-1">
                     <StageStepper patient={selected} />
                   </div>
                 </div>

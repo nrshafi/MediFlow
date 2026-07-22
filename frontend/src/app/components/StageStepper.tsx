@@ -51,7 +51,7 @@ export function StageStepper({ patient, orientation = "horizontal" }: { patient:
   const steps = buildSteps(patient);
   const vertical = orientation === "vertical";
   return (
-    <div className={vertical ? "flex flex-col gap-0" : "flex items-start justify-between gap-1 w-full"}>
+    <div className={vertical ? "flex flex-col gap-0 py-2 px-3.5" : "flex items-start justify-between gap-1 w-full px-5 sm:px-6 pt-4 pb-2"}>
       {steps.map((step, i) => (
         <div key={step.stage} className={vertical ? "flex gap-3" : "flex flex-col items-center flex-1 min-w-0"}>
           <div className={vertical ? "flex flex-col items-center" : "flex items-center w-full"}>
@@ -99,7 +99,7 @@ function Circle({ state, n }: { state: StepState; n: number }) {
   if (state === "current") {
     return (
       <div className="relative flex items-center justify-center shrink-0" style={{ width: 28, height: 28 }}>
-        <span className="absolute inset-0 rounded-full animate-ping" style={{ backgroundColor: "color-mix(in srgb, var(--accent-primary) 40%, transparent)" }} />
+        <span className="absolute inset-0 rounded-full animate-ping pointer-events-none" style={{ backgroundColor: "color-mix(in srgb, var(--accent-primary) 40%, transparent)" }} />
         <div
           className="relative flex items-center justify-center rounded-full font-mono"
           style={{ width: 28, height: 28, border: "2px solid var(--accent-primary)", color: "var(--accent-primary)", fontSize: "11px", backgroundColor: "var(--bg-surface)" }}
