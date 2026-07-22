@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none">
+  <rect width="32" height="32" rx="8" fill="url(#mediflow-bg)" />
+  <path d="M16 6V26" stroke="white" stroke-opacity="0.35" stroke-width="2.5" stroke-linecap="round" />
+  <path d="M5 16H9.5L12 11L15 21L18 12L20.5 16H27" stroke="#FFFFFF" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" />
+  <circle cx="16" cy="6" r="2" fill="#67E8F9" />
+  <circle cx="16" cy="26" r="2" fill="#67E8F9" />
+  <defs>
+    <linearGradient id="mediflow-bg" x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0284C7" />
+      <stop offset="1" stop-color="#0D9488" />
+    </linearGradient>
+  </defs>
+</svg>
