@@ -12,6 +12,10 @@ Update this file after every meaningful implementation change.
 
 ## Completed
 
+- 2026-07-22 - Updated Section 6 ("Technical Complexity & Engineering Architecture") in [docs/faq.md](file:///i:/Development/AI_Hackathon/MediFlow/docs/faq.md) to explicitly contrast the Demo Version (Cloudflare Workers, Turso, synthetic simulation clock) with the Real-World Production Architecture (on-premise hospital local server hosting, local DB, local HMS hooks, local LLM/LAN air-gapping).
+
+- 2026-07-22 - Expanded `docs/faq.md` with comprehensive operational, technical, performance, accessibility, and Judge Pitch presentation defense Q&As (covering deterministic vs RL/ML justification, data privacy/HIPAA, missed turns, zero-hardware costs, and empirical proof of wait-time reduction).
+
 - 2026-07-22 - Upgraded `RoleSwitcher` in `Shell.tsx` to Option 2 (Dynamic Pill layout): replaced static text tabs with dynamic icon pills (`Building2` for Staff, `Stethoscope` for Doctor, `User` for Patient) that expand to show uppercase text labels for the active tab, and added bottom tooltips for all role switcher buttons.
 
 - 2026-07-22 - Removed the GuardrailNote warning element ("⚠ THE LLM NEVER MAKES A SCHEDULING OR CLINICAL DECISION.") and its references from `primitives.tsx`, `StaffDashboard.tsx`, and `DoctorBrief.tsx`.
