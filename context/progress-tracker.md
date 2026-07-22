@@ -12,6 +12,10 @@ Update this file after every meaningful implementation change.
 
 ## Completed
 
+- 2026-07-22 - Configured complete set of Cloudflare MCP servers in `.codex/config.toml` & `.vscode/mcp.json`, installed 11 official Cloudflare agent skills (`npx skills add cloudflare/skills`), and completed Wrangler CLI authentication
+
+- 2026-07-22 - Installed official `@cloudflare/mcp-server-cloudflare` package into root `devDependencies` and verified `.codex/config.toml` configuration and workspace TypeScript checks
+
 - 2026-07-16 - Added `docs/calculations.md`, documenting the deterministic routing formula, queue and wait rules, resource utilization and congestion thresholds, dashboard metric aggregation, baseline calculation, and the LLM's non-decision boundary
 
 - 2026-07-16 - Added `docs/technical-walkthrough.md` plus four Mermaid source diagrams under `docs/diagram/` covering the system, scheduler, patient state, and language-only AI boundary; documented the presentation narrative and a staged real-world overlay integration path

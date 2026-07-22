@@ -18,5 +18,8 @@
     "dev": "npm run dev --workspace @mediflow/frontend",
     "dev:api": "npm run dev --workspace @mediflow/backend",
     "test": "npm run test --workspaces --if-present"
+  },
+  "devDependencies": {
+    "@cloudflare/mcp-server-cloudflare": "^0.2.0"
   }
 }

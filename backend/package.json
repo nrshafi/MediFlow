@@ -9,7 +9,7 @@
     "db:generate": "drizzle-kit generate",
     "db:seed": "node --env-file=.dev.vars --import tsx src/db/seed-cli.ts",
     "dev": "wrangler dev",
-    "test": "node --import tsx --test src/db/seed.test.ts src/engine/baseline.test.ts src/engine/scheduler.test.ts src/llm/adapter.test.ts src/llm/integration.test.ts src/routes/reset.test.ts src/simulation/clock.test.ts src/simulation/day.test.ts"
+    "test": "node --max-old-space-size=4096 --import tsx --test src/db/seed.test.ts src/engine/baseline.test.ts src/engine/scheduler.test.ts src/llm/adapter.test.ts src/llm/integration.test.ts src/routes/reset.test.ts src/simulation/clock.test.ts src/simulation/day.test.ts"
   },
   "dependencies": {
     "@libsql/client": "0.17.4",
