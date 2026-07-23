@@ -12,6 +12,8 @@ Update this file after every meaningful implementation change.
 
 ## Completed
 
+- 2026-07-24 - Rebuilt typography system from scratch using standard modern web application standards (Vercel, Linear, GitHub, Stripe): loaded full Inter variable font (100-900 weights) & JetBrains Mono in `fonts.css`, re-established standard weight hierarchy (400 Regular body, 500 Medium buttons/labels, 600 SemiBold cards/tags, 700 Bold headers), applied modern tracking (`-0.02em` on large metrics and headers), and replaced ad-hoc monospace styling across UI components with clean proportional `font-sans` typography.
+
 - 2026-07-22 - Updated Section 6 ("Technical Complexity & Engineering Architecture") in [docs/faq.md](file:///i:/Development/AI_Hackathon/MediFlow/docs/faq.md) to explicitly contrast the Demo Version (Cloudflare Workers, Turso, synthetic simulation clock) with the Real-World Production Architecture (on-premise hospital local server hosting, local DB, local HMS hooks, local LLM/LAN air-gapping).
 
 - 2026-07-22 - Expanded `docs/faq.md` with comprehensive operational, technical, performance, accessibility, and Judge Pitch presentation defense Q&As (covering deterministic vs RL/ML justification, data privacy/HIPAA, missed turns, zero-hardware costs, and empirical proof of wait-time reduction).

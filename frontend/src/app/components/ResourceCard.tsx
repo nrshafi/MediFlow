@@ -23,10 +23,11 @@ export function ResourceCard({ resource, patients }: { resource: Resource; patie
         <div className="flex items-center gap-1.5 flex-wrap">
           <MonoTag>{resource.tag}</MonoTag>
           <span
-            className="font-mono inline-flex items-center gap-1 rounded-full border px-2 py-[2px] uppercase"
+            className="font-sans font-semibold inline-flex items-center gap-1 rounded-full border px-2 py-[2px] uppercase"
             style={{
               fontSize: "10px",
-              letterSpacing: "0.08em",
+              fontWeight: 600,
+              letterSpacing: "0.06em",
               borderColor: "var(--border-default)",
               color: "var(--text-muted)",
               backgroundColor: "var(--bg-raised)",
@@ -39,9 +40,9 @@ export function ResourceCard({ resource, patients }: { resource: Resource; patie
         <StatusChip status={resource.status} />
       </div>
       <div>
-        <div style={{ fontSize: "16px", color: "var(--text-primary)" }}>{resource.name}</div>
+        <div style={{ fontSize: "16px", fontWeight: 600, color: "var(--text-primary)" }}>{resource.name}</div>
         {resource.specialty && (
-          <div className="font-mono" style={{ fontSize: "11px", color: "var(--text-muted)", letterSpacing: "0.04em" }}>
+          <div className="font-sans" style={{ fontSize: "12px", color: "var(--text-muted)" }}>
             {resource.specialty}
           </div>
         )}
@@ -49,13 +50,13 @@ export function ResourceCard({ resource, patients }: { resource: Resource; patie
       <div className="flex items-center justify-between">
         <div>
           <MicroLabel>NOW</MicroLabel>
-          <div className="font-mono" style={{ fontSize: "12px", color: "var(--text-primary)" }}>
+          <div className="font-sans font-medium" style={{ fontSize: "12px", color: "var(--text-primary)" }}>
             {current ? `${current.name} · ${current.token}` : "—"}
           </div>
         </div>
         <div className="text-right">
           <MicroLabel>QUEUE</MicroLabel>
-          <div className="font-mono" style={{ fontSize: "12px", color: "var(--text-primary)" }}>
+          <div className="font-sans font-semibold" style={{ fontSize: "12px", color: "var(--text-primary)" }}>
             {resource.queue.length}
           </div>
         </div>

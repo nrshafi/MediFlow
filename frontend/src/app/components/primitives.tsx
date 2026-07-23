@@ -7,10 +7,11 @@ import type { Priority, ResourceStatus } from "../lib/types";
 export function MonoTag({ children, className = "" }: { children: ReactNode; className?: string }) {
   return (
     <span
-      className={`font-mono inline-flex items-center rounded-full border px-2 py-[2px] uppercase ${className}`}
+      className={`font-sans font-semibold inline-flex items-center rounded-full border px-2 py-[2px] uppercase ${className}`}
       style={{
         fontSize: "11px",
-        letterSpacing: "0.12em",
+        fontWeight: 600,
+        letterSpacing: "0.06em",
         borderColor: "var(--border-default)",
         color: "var(--text-muted)",
       }}
@@ -24,8 +25,8 @@ export function MonoTag({ children, className = "" }: { children: ReactNode; cla
 export function MicroLabel({ children, className = "" }: { children: ReactNode; className?: string }) {
   return (
     <span
-      className={`font-mono uppercase ${className}`}
-      style={{ fontSize: "11px", letterSpacing: "0.12em", color: "var(--text-muted)" }}
+      className={`font-sans font-semibold uppercase ${className}`}
+      style={{ fontSize: "11px", fontWeight: 600, letterSpacing: "0.06em", color: "var(--text-muted)" }}
     >
       {children}
     </span>
@@ -47,10 +48,11 @@ export function StatusChip({ status }: { status: ResourceStatus }) {
       initial={{ opacity: 0.4 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.25 }}
-      className="font-mono inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 uppercase"
+      className="font-sans font-semibold inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 uppercase"
       style={{
         fontSize: "11px",
-        letterSpacing: "0.1em",
+        fontWeight: 600,
+        letterSpacing: "0.06em",
         color: s.color,
         backgroundColor: `color-mix(in srgb, ${s.color} 12%, transparent)`,
         border: `1px solid color-mix(in srgb, ${s.color} 40%, transparent)`,
@@ -67,10 +69,11 @@ export function PriorityChip({ priority }: { priority: Priority }) {
   if (priority === "urgent") {
     return (
       <span
-        className="font-mono inline-flex items-center rounded-full px-2 py-[2px] uppercase"
+        className="font-sans font-semibold inline-flex items-center rounded-full px-2 py-[2px] uppercase"
         style={{
           fontSize: "10px",
-          letterSpacing: "0.1em",
+          fontWeight: 600,
+          letterSpacing: "0.06em",
           color: "var(--state-error)",
           border: "1px solid var(--state-error)",
         }}
@@ -81,8 +84,14 @@ export function PriorityChip({ priority }: { priority: Priority }) {
   }
   return (
     <span
-      className="font-mono inline-flex items-center rounded-full px-2 py-[2px] uppercase"
-      style={{ fontSize: "10px", letterSpacing: "0.1em", color: "var(--text-muted)", border: "1px solid var(--border-default)" }}
+      className="font-sans font-semibold inline-flex items-center rounded-full px-2 py-[2px] uppercase"
+      style={{
+        fontSize: "10px",
+        fontWeight: 600,
+        letterSpacing: "0.06em",
+        color: "var(--text-muted)",
+        border: "1px solid var(--border-default)",
+      }}
     >
       NORMAL
     </span>
@@ -115,7 +124,7 @@ export function Panel({
 export function QuoteBlock({ children, large = false }: { children: ReactNode; large?: boolean }) {
   return (
     <blockquote
-      className="font-mono rounded-md border-l-2 px-4 py-3"
+      className="font-sans rounded-md border-l-2 px-4 py-3"
       style={{
         borderColor: "var(--accent-primary)",
         backgroundColor: "color-mix(in srgb, var(--accent-primary) 7%, transparent)",
@@ -134,8 +143,8 @@ export function QuoteBlock({ children, large = false }: { children: ReactNode; l
 export function DataFooter() {
   return (
     <div
-      className="font-mono uppercase text-center py-3"
-      style={{ fontSize: "10px", letterSpacing: "0.14em", color: "var(--text-muted)" }}
+      className="font-sans uppercase text-center py-3"
+      style={{ fontSize: "10px", fontWeight: 500, letterSpacing: "0.1em", color: "var(--text-muted)" }}
     >
       SIMULATED DATA — NO REAL PATIENT RECORDS
     </div>

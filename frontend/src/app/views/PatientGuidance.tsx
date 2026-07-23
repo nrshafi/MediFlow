@@ -68,8 +68,8 @@ export function PatientGuidance() {
 
       {/* Identity */}
       <div className="text-center flex flex-col items-center gap-2">
-        <span className="font-mono" style={{ fontSize: "clamp(28px, 6vw, 44px)", color: "var(--accent-primary)", letterSpacing: "0.04em" }}>{patient.token}</span>
-        <span style={{ fontSize: "clamp(18px, 3vw, 24px)", color: "var(--text-primary)" }}>{patient.name}</span>
+        <span className="font-sans" style={{ fontSize: "clamp(28px, 6vw, 44px)", fontWeight: 700, letterSpacing: "-0.02em", color: "var(--accent-primary)" }}>{patient.token}</span>
+        <span style={{ fontSize: "clamp(18px, 3vw, 24px)", fontWeight: 600, color: "var(--text-primary)" }}>{patient.name}</span>
         <PriorityChip priority={patient.priority} />
       </div>
 
@@ -94,7 +94,7 @@ export function PatientGuidance() {
                 initial={{ opacity: 0, boxShadow: "0 0 0 1px color-mix(in srgb, var(--accent-primary) 60%, transparent)" }}
                 animate={{ opacity: 1, boxShadow: "0 0 0 0px transparent" }}
                 transition={{ duration: 0.5 }}
-                className="font-mono rounded-md border-l-2 px-5 py-4"
+                className="font-sans rounded-md border-l-2 px-5 py-4"
                 style={{
                   borderColor: "var(--accent-primary)",
                   backgroundColor: "color-mix(in srgb, var(--accent-primary) 7%, transparent)",
@@ -128,8 +128,8 @@ function BigStat({ label, value }: { label: string; value: number }) {
   return (
     <div className="rounded-2xl p-6 text-center" style={{ backgroundColor: "var(--bg-surface)", border: "1px solid var(--border-default)" }}>
       <MicroLabel>{label}</MicroLabel>
-      <div className="font-mono mt-2" style={{ fontSize: "clamp(28px, 5vw, 40px)", color: "var(--text-primary)" }}>
-        {value}<span style={{ fontSize: "0.5em", color: "var(--text-muted)" }}> MIN</span>
+      <div className="font-sans mt-2" style={{ fontSize: "clamp(28px, 5vw, 40px)", fontWeight: 700, letterSpacing: "-0.02em", color: "var(--text-primary)" }}>
+        {value}<span style={{ fontSize: "0.5em", fontWeight: 500, color: "var(--text-muted)" }}> MIN</span>
       </div>
     </div>
   );

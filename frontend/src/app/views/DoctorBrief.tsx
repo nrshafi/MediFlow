@@ -97,8 +97,8 @@ export function DoctorBrief() {
                     color: "var(--text-primary)",
                   }}
                 >
-                  <div style={{ fontSize: "14px" }}>{d.name}</div>
-                  <div className="font-mono" style={{ fontSize: "11px", color: "var(--text-muted)" }}>{d.specialty}</div>
+                  <div style={{ fontSize: "14px", fontWeight: 600 }}>{d.name}</div>
+                  <div className="font-sans" style={{ fontSize: "12px", color: "var(--text-muted)" }}>{d.specialty}</div>
                 </button>
               );
             })}
@@ -127,13 +127,13 @@ export function DoctorBrief() {
                     }}
                   >
                     <div className="flex items-center justify-between">
-                      <span className="font-mono" style={{ fontSize: "12px", color: "var(--accent-primary)" }}>{p.token}</span>
+                      <span className="font-sans font-semibold" style={{ fontSize: "12px", color: "var(--accent-primary)" }}>{p.token}</span>
                       <PriorityChip priority={p.priority} />
                     </div>
-                    <div style={{ fontSize: "13px", color: "var(--text-primary)", marginTop: 2 }}>{p.name}</div>
+                    <div style={{ fontSize: "13px", fontWeight: 600, color: "var(--text-primary)", marginTop: 2 }}>{p.name}</div>
                     <div className="flex items-center justify-between mt-1">
-                      <span className="font-mono" style={{ fontSize: "11px", color: "var(--text-muted)" }}>{p.age} · {p.gender === "male" ? "M" : "F"} · {p.estimatedConsultationDuration}MIN</span>
-                      <span className="font-mono uppercase" style={{ fontSize: "10px", color: "var(--text-muted)" }}>{i === 0 ? "NOW" : `IN ${eta} MIN`}</span>
+                      <span className="font-sans" style={{ fontSize: "11px", color: "var(--text-muted)" }}>{p.age} · {p.gender === "male" ? "M" : "F"} · {p.estimatedConsultationDuration}MIN</span>
+                      <span className="font-sans font-medium uppercase" style={{ fontSize: "10px", color: "var(--text-muted)" }}>{i === 0 ? "NOW" : `IN ${eta} MIN`}</span>
                     </div>
                   </button>
                 );
@@ -185,10 +185,10 @@ function Brief({
         <div className="flex items-start justify-between flex-wrap gap-3">
           <div>
             <div className="flex items-center gap-3">
-              <span style={{ fontSize: "20px", color: "var(--text-primary)" }}>{patient.name}</span>
+              <span style={{ fontSize: "20px", fontWeight: 600, color: "var(--text-primary)" }}>{patient.name}</span>
               <PriorityChip priority={patient.priority} />
             </div>
-            <div className="font-mono mt-1" style={{ fontSize: "12px", color: "var(--text-muted)" }}>
+            <div className="font-sans mt-1" style={{ fontSize: "12px", color: "var(--text-muted)" }}>
               {patient.token} · {patient.age} yrs · {patient.gender === "male" ? "Male" : "Female"} · ARRIVED {formatSimClock(patient.arrivalTime)}
             </div>
           </div>
@@ -196,7 +196,7 @@ function Brief({
             <MonoTag className="!text-[color:var(--accent-primary)] !border-[color:var(--accent-primary)]">
               {brief?.generatedBy === "gemini" ? "GEMINI BRIEF" : "RECORD BRIEF"}
             </MonoTag>
-            <span className="font-mono uppercase" style={{ fontSize: "10px", color: "var(--text-muted)" }}>GENERATED {formatSimClock(minute)}</span>
+            <span className="font-sans font-medium uppercase" style={{ fontSize: "10px", color: "var(--text-muted)" }}>GENERATED {formatSimClock(minute)}</span>
           </div>
         </div>
       </Panel>
@@ -226,7 +226,7 @@ function Brief({
             {h.allergies.map((a) => (
               <div key={a.substance} className="flex items-center justify-between">
                 <span style={{ fontSize: "14px", color: "var(--text-primary)" }}>{a.substance} → {a.reaction}</span>
-                <span className="font-mono uppercase rounded-full px-2 py-[2px]" style={{ fontSize: "10px", color: "var(--state-error)", border: "1px solid var(--state-error)" }}>{a.severity}</span>
+                <span className="font-sans font-semibold uppercase rounded-full px-2 py-[2px]" style={{ fontSize: "10px", color: "var(--state-error)", border: "1px solid var(--state-error)" }}>{a.severity}</span>
               </div>
             ))}
           </div>
@@ -245,7 +245,7 @@ function Brief({
 
         <BriefSection title="CURRENT MEDICATIONS">
           {h.medications.map((m) => (
-            <Row key={m.name} left={<span className="font-mono" style={{ fontSize: "13px" }}>{m.name} · {m.dose}</span>} right={m.frequency} />
+            <Row key={m.name} left={<span className="font-sans" style={{ fontSize: "13px" }}>{m.name} · {m.dose}</span>} right={m.frequency} />
           ))}
         </BriefSection>
 
@@ -253,7 +253,7 @@ function Brief({
           {h.recentTests.map((t) => (
             <div key={t.test} className="flex items-center justify-between py-1.5" style={{ borderBottom: "1px solid var(--border-default)" }}>
               <span style={{ fontSize: "13px", color: "var(--text-primary)" }}>{t.test}</span>
-              <span className="font-mono flex items-center gap-1" style={{ fontSize: "12px", color: t.flag === "abnormal" ? "var(--state-error)" : "var(--text-muted)" }}>
+              <span className="font-sans font-medium flex items-center gap-1" style={{ fontSize: "12px", color: t.flag === "abnormal" ? "var(--state-error)" : "var(--text-muted)" }}>
                 {t.flag === "abnormal" && <span>▲</span>}{t.value}
               </span>
             </div>
@@ -265,7 +265,7 @@ function Brief({
             <div key={t.procedure} className="py-1.5" style={{ borderBottom: "1px solid var(--border-default)" }}>
               <div className="flex items-center justify-between">
                 <span style={{ fontSize: "13px", color: "var(--text-primary)" }}>{t.procedure}</span>
-                <span className="font-mono" style={{ fontSize: "11px", color: "var(--text-muted)" }}>{t.date}</span>
+                <span className="font-sans" style={{ fontSize: "11px", color: "var(--text-muted)" }}>{t.date}</span>
               </div>
               <span style={{ fontSize: "12px", color: "var(--text-muted)" }}>{t.note}</span>
             </div>
@@ -351,11 +351,12 @@ function BriefNarrative({ content }: { content: string }) {
             }}
           >
             <span
-              className="font-mono uppercase"
+              className="font-sans font-semibold uppercase"
               style={{
                 color: isAttention ? "var(--state-error)" : "var(--accent-primary)",
-                fontSize: "10px",
-                letterSpacing: "0.1em",
+                fontSize: "11px",
+                fontWeight: 600,
+                letterSpacing: "0.06em",
                 lineHeight: 1.6,
               }}
             >

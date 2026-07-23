@@ -25,13 +25,13 @@ export function StatCard({ label, value, unit, deltaPct, lowerIsBetter = true, f
           initial={{ opacity: 0.3 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.3 }}
-          className="font-mono"
-          style={{ fontSize: "30px", lineHeight: 1, color: "var(--text-primary)" }}
+          className="font-sans"
+          style={{ fontSize: "30px", fontWeight: 700, lineHeight: 1, letterSpacing: "-0.02em", color: "var(--text-primary)" }}
         >
           {value}
         </motion.span>
         {unit && (
-          <span className="font-mono" style={{ fontSize: "13px", color: "var(--text-muted)" }}>
+          <span className="font-sans" style={{ fontSize: "13px", fontWeight: 500, color: "var(--text-muted)" }}>
             {unit}
           </span>
         )}
@@ -39,7 +39,7 @@ export function StatCard({ label, value, unit, deltaPct, lowerIsBetter = true, f
       {footNote ? (
         <MicroLabel>{footNote}</MicroLabel>
       ) : deltaPct != null ? (
-        <span className="font-mono inline-flex items-center gap-1" style={{ fontSize: "11px", letterSpacing: "0.06em", color }}>
+        <span className="font-sans font-medium inline-flex items-center gap-1" style={{ fontSize: "11px", letterSpacing: "0.04em", color }}>
           {deltaPct < 0 ? <ArrowDown className="h-3 w-3" /> : <ArrowUp className="h-3 w-3" />}
           {magnitude}% VS UNCOORDINATED
         </span>

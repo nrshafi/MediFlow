@@ -20,11 +20,11 @@ export function AlertCard({ alert }: { alert: BottleneckAlert }) {
         borderLeftColor: color,
       }}
     >
-      <div style={{ fontSize: "13px", color: "var(--text-primary)", lineHeight: 1.5 }}>{alert.headline}</div>
+      <div style={{ fontSize: "13px", fontWeight: 600, color: "var(--text-primary)", lineHeight: 1.5 }}>{alert.headline}</div>
       <div className="mt-1.5" style={{ fontSize: "12px", color: "var(--text-muted)", lineHeight: 1.5 }}>
         {alert.suggestedAction}
       </div>
-      <div className="font-mono mt-2 uppercase" style={{ fontSize: "10px", letterSpacing: "0.1em", color }}>
+      <div className="font-sans font-medium mt-2 uppercase" style={{ fontSize: "10px", letterSpacing: "0.06em", color }}>
         {alert.severity} · DETECTED {formatSimClock(alert.detectedAt)}
       </div>
     </motion.div>
