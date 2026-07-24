@@ -85,8 +85,8 @@ export function StageStepper({
                     step.state === "current"
                       ? activeColor
                       : step.state === "done"
-                      ? "var(--text-primary)"
-                      : "var(--text-muted)",
+                        ? "var(--text-primary)"
+                        : "var(--text-muted)",
                 }}
               >
                 {step.label}
@@ -129,8 +129,8 @@ export function StageStepper({
                     step.state === "current"
                       ? activeColor
                       : step.state === "done"
-                      ? "var(--text-primary)"
-                      : "var(--text-muted)",
+                        ? "var(--text-primary)"
+                        : "var(--text-muted)",
                 }}
                 title={step.label}
               >

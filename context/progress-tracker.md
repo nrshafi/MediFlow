@@ -12,6 +12,16 @@ Update this file after every meaningful implementation change.
 
 ## Completed
 
+- 2026-07-24 - Updated `CURRENT MEDICATIONS` section card theme in `DoctorBrief.tsx`: changed color palette tokens from generic state success (`var(--state-success)`) to MediFlow's secondary clinical teal accent (`var(--accent-secondary)`), giving the section distinct, vibrant visual branding.
+
+- 2026-07-24 - Streamlined and removed unnecessary redundant icons across `DoctorBrief.tsx`: removed page title header icon, doctor button icon boxes, sidebar section header icons, inline token/clock icons from patient header/queue list, and duplicate icons inside right-aligned status pill badges (`3 MEDICATIONS`, `NEEDS REVIEW`, `CLEAR`), maintaining a clean, high-contrast visual design.
+
+- 2026-07-24 - Updated section summary text font weight in `DoctorBrief.tsx`: changed summary text font weight from bold (`fontWeight: 600`) to regular (`fontWeight: 400`) so category record descriptions (medications, diagnoses, test results, etc.) are rendered in normal weight.
+
+- 2026-07-24 - Redesigned the Doctor Brief Header, Pre-Consultation Summary, and Medical Record History Grid (`DoctorBrief.tsx` & `brief-format.ts`): aligned all section cards (`PREVIOUS DIAGNOSES`, `CURRENT MEDICATIONS`, `RECENT TEST RESULTS`, `TREATMENT HISTORY`) with the unified category-specific color themes, soft pastel background fills, bold section titles (`font-bold`, `fontWeight: 700`), circular left icon badges (`Activity`, `Pill`, `FlaskConical`, `History`, `ShieldCheck`, `ShieldAlert`, `TrendingUp`), and dynamic right-aligned count/status pill badges (`2 Conditions`, `1 Medication`, `3 Tests`, `Latest: [Date]`, `Needs Review`, `Clear`).
+
+- 2026-07-24 - Added relevant Lucide React icons across the Doctor Brief page (`DoctorBrief.tsx`): integrated `Stethoscope` header & doctor selector icons, `Users` queue header icon, `User`, `FileText`, and `Clock` patient/arrival details, `Sparkles` summary header icon, `CheckCircle2` allergy status icon, `UserSearch` empty queue icon, and `Activity`, `Pill`, `FlaskConical`, `History`, and `TrendingUp` icons across medical record section cards.
+
 - 2026-07-24 - Redesigned the Patient Guidance view (`PatientGuidance.tsx` & `StageStepper.tsx`) to match exact mockups for Normal and Urgent patient statuses: centered header identity, next-step action cards with priority color themes (cyan/teal for normal, rose/red for urgent), estimated wait counters, icon-enhanced stage steppers (`✓`, `FlaskConical`, `Stethoscope`, `Scan`, `Activity`, `Pill`), time remaining countdowns with progress bars, and stage expectation callouts.
 
 - 2026-07-24 - Enhanced selected doctor button styling in `DoctorBrief.tsx`: highlighted active doctor selection with primary accent color (`--accent-primary`), a left accent indicator bar, primary accent background tint (`color-mix`), and primary text color emphasis.

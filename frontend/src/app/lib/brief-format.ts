@@ -20,9 +20,14 @@ function cleanLabel(value: string): string {
   return value.replace(/^#+\s*/, "").replace(/:\s*$/, "").trim();
 }
 
-function sectionTone(label: string | null): FormattedBriefSection["tone"] {
+function sectionTone(label: string | null, text: string): FormattedBriefSection["tone"] {
   if (!label) return "default";
-  return /allerg|abnormal/i.test(label) ? "attention" : "default";
+  if (/allerg/i.test(label)) {
+    if (/none|no known|n\/a|nil/i.test(text)) return "default";
+    return "attention";
+  }
+  if (/abnormal/i.test(label)) return "attention";
+  return "default";
 }
 
 function makeSection(
@@ -35,7 +40,7 @@ function makeSection(
   return {
     label: cleanedLabel,
     text: cleanedText,
-    tone: sectionTone(cleanedLabel),
+    tone: sectionTone(cleanedLabel, cleanedText),
   };
 }
 

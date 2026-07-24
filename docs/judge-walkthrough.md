@@ -25,7 +25,7 @@ should control playback during the demo.
 
 | Time | Presenter action | Talk track |
 | --- | --- | --- |
-| 0:00 | Show the empty Staff dashboard and the amber guardrail. | "MediFlow is an orchestration layer on top of existing hospital systems. The scheduling engine is deterministic; Gemini explains decisions and summarizes records, but never schedules or makes clinical decisions." |
+| 0:00 | Show the empty Staff dashboard | "MediFlow is an orchestration layer on top of existing hospital systems. The scheduling engine is deterministic; Gemini explains decisions and summarizes records, but never schedules or makes clinical decisions." |
 | 0:25 | Start 4x playback. Point to arrivals, Busy/Available states, queues, and changing wait estimates. | "Every simulated minute is persisted. As patients arrive or finish a stage, MediFlow recalculates the best next step across doctors, laboratory, X-ray, and ECG." |
 | 0:55 | Point to the patient table and resource cards. | "Urgent patients move ahead in waiting queues without interrupting care already in progress. Equal-priority patients remain FIFO, and every recommendation is auditable." |
 | 1:20 | Switch to Patient. Select an active patient if needed. | "The patient sees one plain-language instruction, an estimated wait, time remaining, and their progress through the visit. The frontend renders the engine's decision; it does not recompute it." |
