@@ -12,6 +12,10 @@ Update this file after every meaningful implementation change.
 
 ## Completed
 
+- 2026-07-24 - Redesigned the Patient Guidance view (`PatientGuidance.tsx` & `StageStepper.tsx`) to match exact mockups for Normal and Urgent patient statuses: centered header identity, next-step action cards with priority color themes (cyan/teal for normal, rose/red for urgent), estimated wait counters, icon-enhanced stage steppers (`✓`, `FlaskConical`, `Stethoscope`, `Scan`, `Activity`, `Pill`), time remaining countdowns with progress bars, and stage expectation callouts.
+
+- 2026-07-24 - Enhanced selected doctor button styling in `DoctorBrief.tsx`: highlighted active doctor selection with primary accent color (`--accent-primary`), a left accent indicator bar, primary accent background tint (`color-mix`), and primary text color emphasis.
+
 - 2026-07-24 - Rebuilt typography system from scratch using standard modern web application standards (Vercel, Linear, GitHub, Stripe): loaded full Inter variable font (100-900 weights) & JetBrains Mono in `fonts.css`, re-established standard weight hierarchy (400 Regular body, 500 Medium buttons/labels, 600 SemiBold cards/tags, 700 Bold headers), applied modern tracking (`-0.02em` on large metrics and headers), and replaced ad-hoc monospace styling across UI components with clean proportional `font-sans` typography.
 
 - 2026-07-22 - Updated Section 6 ("Technical Complexity & Engineering Architecture") in [docs/faq.md](file:///i:/Development/AI_Hackathon/MediFlow/docs/faq.md) to explicitly contrast the Demo Version (Cloudflare Workers, Turso, synthetic simulation clock) with the Real-World Production Architecture (on-premise hospital local server hosting, local DB, local HMS hooks, local LLM/LAN air-gapping).

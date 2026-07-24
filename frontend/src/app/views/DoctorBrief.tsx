@@ -92,13 +92,14 @@ export function DoctorBrief() {
                   aria-pressed={isActive}
                   className="text-left rounded-md px-3 py-2 transition-colors"
                   style={{
-                    border: "1px solid var(--border-default)",
-                    backgroundColor: isActive ? "var(--bg-raised)" : "var(--bg-surface)",
+                    border: isActive ? "1px solid var(--accent-primary)" : "1px solid var(--border-default)",
+                    borderLeft: isActive ? "4px solid var(--accent-primary)" : "1px solid var(--border-default)",
+                    backgroundColor: isActive ? "color-mix(in srgb, var(--accent-primary) 8%, var(--bg-surface))" : "var(--bg-surface)",
                     color: "var(--text-primary)",
                   }}
                 >
-                  <div style={{ fontSize: "14px", fontWeight: 600 }}>{d.name}</div>
-                  <div className="font-sans" style={{ fontSize: "12px", color: "var(--text-muted)" }}>{d.specialty}</div>
+                  <div style={{ fontSize: "14px", fontWeight: 600, color: isActive ? "var(--accent-primary)" : "var(--text-primary)" }}>{d.name}</div>
+                  <div className="font-sans" style={{ fontSize: "12px", color: isActive ? "var(--text-primary)" : "var(--text-muted)" }}>{d.specialty}</div>
                 </button>
               );
             })}
