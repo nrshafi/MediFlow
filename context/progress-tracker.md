@@ -12,6 +12,8 @@ Update this file after every meaningful implementation change.
 
 ## Completed
 
+- 2026-07-24 - Added Bottleneck Detection callout, dynamic resource load breakdown, and Bottleneck History timeline (`BottleneckPanel.tsx` & `StaffDashboard.tsx`): built a dedicated `BottleneckPanel` rendering live alert callouts (green tinted balanced state with checkmark vs active warning/critical cards), dynamic resource load metrics (`Highest load`, `Diagnostics average`, `Lowest load`) with mini visual progress bars, and a real-time `Bottleneck History` event log tracking simulation minute events, congestion warnings, and flow resolutions; fixed timeline node circle clipping by adding left container padding (`pl-3.5`) and centering node dots (`-left-[7.5px]`).
+
 - 2026-07-24 - Updated `CURRENT MEDICATIONS` section card theme in `DoctorBrief.tsx`: changed color palette tokens from generic state success (`var(--state-success)`) to MediFlow's secondary clinical teal accent (`var(--accent-secondary)`), giving the section distinct, vibrant visual branding.
 
 - 2026-07-24 - Streamlined and removed unnecessary redundant icons across `DoctorBrief.tsx`: removed page title header icon, doctor button icon boxes, sidebar section header icons, inline token/clock icons from patient header/queue list, and duplicate icons inside right-aligned status pill badges (`3 MEDICATIONS`, `NEEDS REVIEW`, `CLEAR`), maintaining a clean, high-contrast visual design.

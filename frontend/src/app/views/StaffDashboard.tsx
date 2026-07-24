@@ -1,15 +1,13 @@
 import { useMemo, useState } from "react";
-import { AnimatePresence } from "motion/react";
 import { ArrowRight, Search } from "lucide-react";
 import { useSim, formatSimTime } from "../store/SimContext";
 import type { Patient, Stage } from "../lib/types";
 import { MicroLabel, Panel, PriorityChip, QuoteBlock, MonoTag } from "../components/primitives";
 import { StatCard } from "../components/StatCard";
 import { ResourceCard } from "../components/ResourceCard";
-import { AlertCard } from "../components/AlertCard";
+import { BottleneckPanel } from "../components/BottleneckPanel";
 import { QueueDepthChart, ComparisonChart } from "../components/Charts";
 import { StageStepper } from "../components/StageStepper";
-import { PulseDot } from "../components/Shell";
 import { Skeleton } from "../components/ui/skeleton";
 import {
   Dialog,
@@ -154,25 +152,8 @@ export function StaffDashboard() {
           </div>
         </div>
 
-        {/* Bottleneck rail */}
-        <div className="flex flex-col gap-4">
-          <div className="flex items-center gap-2">
-            <PulseDot />
-            <MicroLabel>BOTTLENECK DETECTION</MicroLabel>
-          </div>
-          <div className="flex flex-col gap-3" aria-live="polite">
-            <AnimatePresence mode="popLayout">
-              {alerts.length === 0 ? (
-                <Panel key="empty" className="flex items-center gap-2">
-                  <span style={{ color: "var(--state-success)", fontSize: "16px" }}>✓</span>
-                  <span style={{ fontSize: "13px", color: "var(--text-muted)" }}>No bottlenecks detected — flow is balanced.</span>
-                </Panel>
-              ) : (
-                alerts.map((a) => <AlertCard key={a.id} alert={a} />)
-              )}
-            </AnimatePresence>
-          </div>
-        </div>
+        {/* Bottleneck section */}
+        <BottleneckPanel />
       </div>
 
       {/* Patient flow table */}
